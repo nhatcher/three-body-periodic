@@ -316,15 +316,16 @@ pub fn evolve(bodies: &mut [Body], t_end: f64) -> (Vec<f64>, f64) {
             result.push(y[o + 1]);
             result.push(y[o + 2]);
         }
+        result.push(t);
 
         // clamp final step to hit t_end
-        if (t + h - t_end).abs() < (h.abs() * 0.5) || (t + h - t_end).signum() == dir {
+        if (t - t_end).abs() < (h.abs() * 0.5) || (t - t_end).signum() == dir {
             h = t_end - t;
         }
 
         let (y_trial, errn, _k1) = dop853_trial(&y, h, &masses, eps2, RTOL, ATOL);
 
-        if errn <= 1.0 || h == (t_end - t) {
+        if errn <= 1.0 || ((t - t_end) * dir) >= 0.0 {
             // accept
             y = y_trial;
             t += h;
@@ -346,12 +347,13 @@ pub fn evolve(bodies: &mut [Body], t_end: f64) -> (Vec<f64>, f64) {
         if h.abs() < 1e-16 {
             // give up to avoid infinite loop in extreme cases
             break;
+            // h = t_end - t;
         }
         if (t_end - t).abs() <= 0.0 {
             break;
         }
         // ensure we don't overshoot (only clamp if stepping past t_end)
-        if ((t + h - t_end) * dir) > 0.0 {
+        if ((t - t_end) * dir) > 0.0 {
             h = t_end - t;
         }
     }

@@ -63,7 +63,7 @@ fn step_rk4(bodies: &mut [Body], dt: f64, eps2: f64) {
 pub fn evolve(bodies: &mut [Body], t_end: f64) -> (Vec<f64>, f64) {
     let dt = 1e-5;
     // softening^2; set 0.0 to disable
-    let eps2 = 1e-8;
+    let eps2 = 0.0; // 1e-8;
     let mut t = 0.0;
     let mut result = Vec::new();
     while t < t_end {

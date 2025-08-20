@@ -1,12 +1,9 @@
 
 import init, { evolve } from './pkg/three_body_wasm.js';
-import bhh_table_4 from './examples/bhh_satellites_table_4.js';
-import bhh_table_3 from './examples/bhh_satellites_table_3.js';
 import unequal_mass from './examples/unequal_mass.js';
+import equal_mass from './examples/equal_mass.js';
 import choreographies from './examples/choreographies.js';
 import free_fall from './examples/free_fall.js';
-import free_fall_8_6 from './examples/free_fall_8_6.js';
-import free_fall_8_2 from './examples/free_fall_8_2.js';
 
 await init();
 
@@ -23,8 +20,10 @@ const timeSlider = document.getElementById('control-time');
 const exampleClassDropdown = document.getElementById('example-class');
 const exampleSelect = document.getElementById('example');
 
+// paths: [ [ [x,y], ... ], [ ... ], [ ... ] ]
 let paths = [[], [], []];
 let masses = [1, 1, 1];
+let times = [];
 
 
 function getExampleValues() {
@@ -32,54 +31,6 @@ function getExampleValues() {
     const example = exampleSelect.value;
     let values;
     switch (exampleClass) {
-        case 'bhh_satellites_table_4':
-            switch (example) {
-                case 'getExampleA':
-                    values = bhh_table_4.getExampleA();
-                    break;
-                case 'getExampleB':
-                    values = bhh_table_4.getExampleB();
-                    break;
-                case 'getExampleC':
-                    values = bhh_table_4.getExampleC();
-                    break;
-                case 'getExampleD':
-                    values = bhh_table_4.getExampleD();
-                    break;
-                case 'getExampleE':
-                    values = bhh_table_4.getExampleE();
-                    break;
-                case 'getExampleF':
-                    values = bhh_table_4.getExampleF();
-                    break;
-                default:
-                    throw new Error(`Unknown example: ${example}`);
-            }
-            break;
-        case 'bhh_satellites_table_3':
-            switch (example) {
-                case 'getExampleA':
-                    values = bhh_table_3.getExampleA();
-                    break;
-                case 'getExampleB':
-                    values = bhh_table_3.getExampleB();
-                    break;
-                case 'getExampleC':
-                    values = bhh_table_3.getExampleC();
-                    break;
-                case 'getExampleD':
-                    values = bhh_table_3.getExampleD();
-                    break;
-                case 'getExampleE':
-                    values = bhh_table_3.getExampleE();
-                    break;
-                case 'getExampleF':
-                    values = bhh_table_3.getExampleF();
-                    break;
-                default:
-                    throw new Error(`Unknown example: ${example}`);
-            }
-            break;
         case 'choreographies':
             switch (example) {
                 case 'getEight':
@@ -96,40 +47,13 @@ function getExampleValues() {
             }
             break;
         case 'free_fall':
-            switch (example) {
-                case 'getExample1':
-                    values = free_fall.getExample1();
-                    break;
-                case 'getExample2':
-                    values = free_fall.getExample2();
-                    break;
-                case 'getExample3':
-                    values = free_fall.getExample3();
-                    break;
-                default:
-                    throw new Error(`Unknown example: ${example}`);
-            }
-            break;
-        case 'free_fall_8_6':
-            values = free_fall_8_6[example]();
-            break;
-        case 'free_fall_8_2':
-            values = free_fall_8_2[example]();
+            values = free_fall.getOrbit(example);
             break;
         case 'unequal_mass':
-            switch (example) {
-                case 'getExample1':
-                    values = unequal_mass.getExample1();
-                    break;
-                case 'getExample2':
-                    values = unequal_mass.getExample2();
-                    break;
-                case 'getExample3':
-                    values = unequal_mass.getExample3();
-                    break;
-                default:
-                    throw new Error(`Unknown example: ${example}`);
-            }
+            values = unequal_mass.getOrbit(example);
+            break;
+        case 'equal_mass':
+            values = equal_mass.getOrbit(example);
             break;
     }
     return values;
@@ -164,32 +88,30 @@ function fill_example_dropdown() {
 
     // Clear existing options
     exampleSelect.innerHTML = '';
-
     let examples;
+    if (exampleClass === 'free_fall' || exampleClass === 'unequal_mass' || exampleClass === 'equal_mass') {
+        // Special case for free fall, populate with specific examples
+
+        if (exampleClass === 'free_fall') {
+            examples = free_fall.getNames();
+        } else if (exampleClass === 'unequal_mass') {
+            examples = unequal_mass.getNames();
+        } else if (exampleClass === 'equal_mass') {
+            examples = equal_mass.getNames();
+        }
+        examples.forEach((name, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = name;
+            exampleSelect.appendChild(option);
+        });
+        return;
+    }
+
+    
     switch (exampleClass) {
-        case 'bhh_satellites_table_4':
-            examples = bhh_table_4;
-            break;
-        case 'bhh_satellites_table_3':
-            examples = bhh_table_3;
-            break;
-        case 'unequal_mass':
-            examples = unequal_mass;
-            break;
         case 'choreographies':
             examples = choreographies;
-            break;
-        case 'free_fall':
-            examples = free_fall;
-            break;
-        case 'free_fall_8_6':
-            examples = free_fall_8_6;
-            break;
-        case 'free_fall_8_6':
-            examples = free_fall_8_6;
-            break;
-        case 'free_fall_8_2':
-            examples = free_fall_8_2;
             break;
         default:
             throw new Error(`Unknown example class: ${exampleClass}`);
@@ -231,8 +153,7 @@ function readIC2D() {
     return [...b1, ...b2, ...b3];
 }
 
-function computeBounds(paths) {
-    // paths: [ [ [x,y], ... ], [ ... ], [ ... ] ]
+function computeBounds() {
     let minX = +Infinity, minY = +Infinity, maxX = -Infinity, maxY = -Infinity;
     for (const path of paths) {
         for (const [x, y] of path) {
@@ -247,7 +168,7 @@ function computeBounds(paths) {
 }
 
 function makeProjector() {
-    const bounds = computeBounds(paths);
+    const bounds = computeBounds();
     const w = canvas.clientWidth, h = canvas.clientHeight;
     const dx = Math.max(1e-12, bounds.maxX - bounds.minX);
     const dy = Math.max(1e-12, bounds.maxY - bounds.minY);
@@ -331,16 +252,17 @@ function draw() {
 
 const MAX_POINTS_PER_BODY = 10_000;
 function reshapeResultToPaths(result) {
-    // result is Float64Array of length 9 * steps: [x1,y1,z1, x2,y2,z2, x3,y3,z3] per step
+    // result is Float64Array of length 10 * steps: [x1,y1,z1, x2,y2,z2, x3,y3,z3, t] per step
     const resultCount = result.length;
-    if (resultCount % 9 !== 0) {
-        throw new Error('Result length is not a multiple of 9.');
+    if (resultCount % 10 !== 0) {
+        throw new Error('Result length is not a multiple of 10.');
     }
-    const stepCount = resultCount / 9;
+    const stepCount = resultCount / 10;
     const paths = [[], [], []];
-    const bigStep = Math.floor(resultCount / Math.min(9 * MAX_POINTS_PER_BODY, resultCount));
+    const times = [];
+    const bigStep = Math.floor(resultCount / Math.min(10 * MAX_POINTS_PER_BODY, resultCount));
     for (let s = 0; s < stepCount; s += bigStep) {
-        const base = s * 9;
+        const base = s * 10;
         for (let b = 0; b < 3; b++) {
             const x = result[base + b * 3 + 0];
             const y = result[base + b * 3 + 1];
@@ -348,8 +270,9 @@ function reshapeResultToPaths(result) {
             // const z = result[base + b*3 + 2];
             paths[b].push([x, y]);
         }
+        times.push(result[base + 9]);
     }
-    return paths;
+    return { paths, times };
 }
 
 function run() {
@@ -367,13 +290,14 @@ function run() {
 
         const t0 = performance.now();
         const result = evolve(ic, t, method); // throws on Err(String)
-        console.log(result);
         const t1 = performance.now();
 
-        paths = reshapeResultToPaths(result);
+        const x = reshapeResultToPaths(result);
+        paths = x.paths;
+        times = x.times;
         draw();
 
-        const steps = result.length / 9;
+        const steps = result.length / 10;
         statusEl.textContent = `OK — steps: ${steps.toLocaleString()} | points/body: ${paths[0].length.toLocaleString()} | compute: ${(t1 - t0).toFixed(1)} ms`;
     } catch (err) {
         console.error(err);

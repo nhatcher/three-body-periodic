@@ -18,9 +18,9 @@
       <div class="control">
         <label for="method">Method</label>
         <select id="method">
+          <option value="dop853">DOP853 (order 8)</option>
           <option value="verlet">velocity-Verlet (symplectic)</option>
           <option value="rk4">Runge–Kutta (order 4)</option>
-          <option value="dop853">DOP853 (order 8)</option>
         </select>
         <label for="time">Total time t (seconds)</label>
         <input id="time" type="number" step="0.01" min="0.01" value="4.1761292190" />
@@ -55,13 +55,12 @@
       <div class="control">
         <label for="example-class">Example class</label>
         <select id="example-class">
-          <option value="free_fall_8_6">Free Fall 8-6</option>
-          <option value="free_fall_8_2">Free Fall 8-2</option>
-          <option value="bhh_satellites_table_3">BHH Satellites Table 3</option>
-          <option value="bhh_satellites_table_4">BHH Satellites Table 4</option>
+          <option value="free_fall">Free Fall</option>
+          <option value="equal_mass">Equal Mass</option>
           <option value="unequal_mass">Unequal Mass</option>
           <option value="choreographies">Choreographies</option>
-          <option value="free_fall">Free Fall</option>
+          <!-- <option value="bhh_satellites_table_3">BHH Satellites Table 3</option>
+          <option value="bhh_satellites_table_4">BHH Satellites Table 4</option> -->
         </select>
         <label for="example">Select example</label>
         <select id="example">

@@ -66,7 +66,7 @@ pub fn evolve(bodies: &mut [Body], t_end: f64) -> (Vec<f64>, f64) {
         step_sym4(bodies, dt, eps2);
         t += dt;
     }
-    // // Optional final partial step
+    // Optional final partial step
     let rem = t_end - t;
     if rem > 0.0 {
         step_sym4(bodies, rem, eps2);
