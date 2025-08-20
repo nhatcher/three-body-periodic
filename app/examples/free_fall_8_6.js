@@ -1,0 +1,138 @@
+// F(m1,m2,m3) x y T
+// F1(1,0.8,0.6) 0.0445314006 0.7402164268 2.8030997992
+// F2(1,0.8,0.6) 0.0596000878 0.7375612563 3.4959622385
+// F3(1,0.8,0.6) 0.1174556037 0.716752919 2.7369656923
+// F4(1,0.8,0.6) 0.0651532615 0.7533349173 4.1668179824
+// F5(1,0.8,0.6) 0.129088109 0.4010761427 2.500764871
+// F6(1,0.8,0.6) 0.3133248745 0.3258575422 2.6081696286
+// F7(1,0.8,0.6) 0.007896547 0.2369793668 2.560892572
+// F8(1,0.8,0.6) 0.0666851373 0.7642377831 4.796190851
+// F9(1,0.8,0.6) 0.1288237799 0.257598905 2.563208106
+// F10(1,0.8,0.6) 0.1156599683 0.4136953992 3.1416626327
+// F11(1,0.8,0.6) 0.0119593475 0.2408362224 2.9430485048
+// F12(1,0.8,0.6) 0.1023506488 0.408866949 3.6750954828
+// F13(1,0.8,0.6) 0.169463742 0.0159900098 2.4177885604
+// F14(1,0.8,0.6) 0.2707648383 0.1015364734 2.0709517775
+// F15(1,0.8,0.6) 0.361264345 0.294301541 2.7889383936
+// F16(1,0.8,0.6) 0.4108603284 0.2242851684 2.1055583251
+// F17(1,0.8,0.6) 0.0932368548 0.4030127578 4.1731767189
+// F18(1,0.8,0.6) 0.1352566765 0.6807175103 6.7293787182
+// F19(1,0.8,0.6) 0.2725304223 0.1732922849 2.6175552797
+// F20(1,0.8,0.6) 0.3125456686 0.086616029 1.9950219564
+// F21(1,0.8,0.6) 0.1882144839 0.3345735824 3.5219440458
+// F22(1,0.8,0.6) 0.0716145199 0.0915187956 3.8642156146
+// F23(1,0.8,0.6) 0.0869005363 0.397993724 4.6539481356
+// F24(1,0.8,0.6) 0.3563440713 0.2981031724 3.6559375422
+// F25(1,0.8,0.6) 0.2880532139 0.4825865222 4.6073152572
+// F26(1,0.8,0.6) 0.4160772504 0.2310953494 2.8622355529
+// F27(1,0.8,0.6) 0.3987945492 0.3025049316 3.3736146266
+// F28(1,0.8,0.6) 0.077642587 0.1746563917 4.4628708319
+// F29(1,0.8,0.6) 0.0599809897 0.0926220002 4.3653925159
+// F30(1,0.8,0.6) 0.0579903544 0.0443882673 4.3050365191
+// F31(1,0.8,0.6) 0.09346147 0.0471665194 4.1680025233
+// F32(1,0.8,0.6) 0.1325902103 0.4123819959 5.6679076918
+// F33(1,0.8,0.6) 0.104144912 0.1482283553 4.3424138584
+// F34(1,0.8,0.6) 0.1993569698 0.0777479367 3.8425401785
+// F35(1,0.8,0.6) 0.1341720545 0.4004224629 5.4787823377
+// F36(1,0.8,0.6) 0.2974062043 0.5279669906 6.3977820308
+// F37(1,0.8,0.6) 0.2979333584 0.4813611322 5.0215788607
+// F38(1,0.8,0.6) 0.2660209853 0.507899546 6.132677999
+// F39(1,0.8,0.6) 0.352368316 0.2982025789 4.0622574955
+// F40(1,0.8,0.6) 0.4161870623 0.232018837 3.1969547246
+// F41(1,0.8,0.6) 0.4020135877 0.3030079422 3.6862253065
+
+
+function makeExample(x, y, t) {
+  return [
+    [-0.5, 0, 0, 0, 0, 0, 1],
+    [x, y, 0, 0, 0, 0, 0.6],
+    [0.5, 0, 0, 0, 0, 0, 0.8],
+    t
+  ];
+}
+
+function getExample1()  { return makeExample(0.0445314006, 0.7402164268, 2.8030997992); }
+function getExample2()  { return makeExample(0.0596000878, 0.7375612563, 3.4959622385); }
+function getExample3()  { return makeExample(0.1174556037, 0.716752919, 2.7369656923); }
+function getExample4()  { return makeExample(0.0651532615, 0.7533349173, 4.1668179824); }
+function getExample5()  { return makeExample(0.129088109, 0.4010761427, 2.500764871); }
+function getExample6()  { return makeExample(0.3133248745, 0.3258575422, 2.6081696286); }
+function getExample7()  { return makeExample(0.007896547, 0.2369793668, 2.560892572); }
+function getExample8()  { return makeExample(0.0666851373, 0.7642377831, 4.796190851); }
+function getExample9()  { return makeExample(0.1288237799, 0.257598905, 2.563208106); }
+function getExample10() { return makeExample(0.1156599683, 0.4136953992, 3.1416626327); }
+function getExample11() { return makeExample(0.0119593475, 0.2408362224, 2.9430485048); }
+function getExample12() { return makeExample(0.1023506488, 0.408866949, 3.6750954828); }
+function getExample13() { return makeExample(0.169463742, 0.0159900098, 2.4177885604); }
+function getExample14() { return makeExample(0.2707648383, 0.1015364734, 2.0709517775); }
+function getExample15() { return makeExample(0.361264345, 0.294301541, 2.7889383936); }
+function getExample16() { return makeExample(0.4108603284, 0.2242851684, 2.1055583251); }
+function getExample17() { return makeExample(0.0932368548, 0.4030127578, 4.1731767189); }
+function getExample18() { return makeExample(0.1352566765, 0.6807175103, 6.7293787182); }
+function getExample19() { return makeExample(0.2725304223, 0.1732922849, 2.6175552797); }
+function getExample20() { return makeExample(0.3125456686, 0.086616029, 1.9950219564); }
+function getExample21() { return makeExample(0.1882144839, 0.3345735824, 3.5219440458); }
+function getExample22() { return makeExample(0.0716145199, 0.0915187956, 3.8642156146); }
+function getExample23() { return makeExample(0.0869005363, 0.397993724, 4.6539481356); }
+function getExample24() { return makeExample(0.3563440713, 0.2981031724, 3.6559375422); }
+function getExample25() { return makeExample(0.2880532139, 0.4825865222, 4.6073152572); }
+function getExample26() { return makeExample(0.4160772504, 0.2310953494, 2.8622355529); }
+function getExample27() { return makeExample(0.3987945492, 0.3025049316, 3.3736146266); }
+function getExample28() { return makeExample(0.077642587, 0.1746563917, 4.4628708319); }
+function getExample29() { return makeExample(0.0599809897, 0.0926220002, 4.3653925159); }
+function getExample30() { return makeExample(0.0579903544, 0.0443882673, 4.3050365191); }
+function getExample31() { return makeExample(0.09346147, 0.0471665194, 4.1680025233); }
+function getExample32() { return makeExample(0.1325902103, 0.4123819959, 5.6679076918); }
+function getExample33() { return makeExample(0.104144912, 0.1482283553, 4.3424138584); }
+function getExample34() { return makeExample(0.1993569698, 0.0777479367, 3.8425401785); }
+function getExample35() { return makeExample(0.1341720545, 0.4004224629, 5.4787823377); }
+function getExample36() { return makeExample(0.2974062043, 0.5279669906, 6.3977820308); }
+function getExample37() { return makeExample(0.2979333584, 0.4813611322, 5.0215788607); }
+function getExample38() { return makeExample(0.2660209853, 0.507899546, 6.132677999); }
+function getExample39() { return makeExample(0.352368316, 0.2982025789, 4.0622574955); }
+function getExample40() { return makeExample(0.4161870623, 0.232018837, 3.1969547246); }
+function getExample41() { return makeExample(0.4020135877, 0.3030079422, 3.6862253065); }
+
+export default {
+  getExample1,
+  getExample2,
+  getExample3,
+  getExample4,
+  getExample5,
+  getExample6,
+  getExample7,
+  getExample8,
+  getExample9,
+  getExample10,
+  getExample11,
+  getExample12,
+  getExample13,
+  getExample14,
+  getExample15,
+  getExample16,
+  getExample17,
+  getExample18,
+  getExample19,
+  getExample20,
+  getExample21,
+  getExample22,
+  getExample23,
+  getExample24,
+  getExample25,
+  getExample26,
+  getExample27,
+  getExample28,
+  getExample29,
+  getExample30,
+  getExample31,
+  getExample32,
+  getExample33,
+  getExample34,
+  getExample35,
+  getExample36,
+  getExample37,
+  getExample38,
+  getExample39,
+  getExample40,
+  getExample41
+};
