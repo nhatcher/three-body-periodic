@@ -322,14 +322,15 @@ function draw() {
     const factor = parseFloat(timeSlider.value) / parseFloat(timeSlider.max);
 
     paths.forEach((pts, i) => {
-        const l = Math.floor(pts.length * factor);
+        const l = pts.length;
         if (l === 0) {
             return;
         }
         ctx.beginPath();
         const [x0, y0] = toCanvas(pts[0][0], pts[0][1]);
         ctx.moveTo(x0, y0);
-        for (let k = 1; k < l; k++) {
+        let k = 1;
+        for (k = 1; k < l && times[k] < factor * times[times.length - 1]; k++) {
             const [x, y] = toCanvas(pts[k][0], pts[k][1]);
             ctx.lineTo(x, y);
         }
@@ -341,9 +342,23 @@ function draw() {
         ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2); ctx.strokeStyle = colors[i]; ctx.stroke();
 
         // End marker
-        const [ex, ey] = toCanvas(pts[l - 1][0], pts[l - 1][1]);
+        const [ex, ey] = toCanvas(pts[k - 1][0], pts[k - 1][1]);
         ctx.beginPath(); ctx.arc(ex, ey, 5, 0, Math.PI * 2); ctx.fillStyle = colors[i]; ctx.fill();
     });
+}
+
+function play_loop() {
+    const sliderValue = parseFloat(timeSlider.value);
+    const maxTime = parseFloat(timeSlider.max);
+    if (sliderValue >= maxTime) {
+        timeSlider.value = '0';
+    } else {
+        timeSlider.value = (sliderValue + 1).toString();
+    }
+    draw();
+    if (runButton.innerText === 'Pause') {
+        requestAnimationFrame(play_loop);
+    }
 }
 
 const MAX_POINTS_PER_BODY = 10_000;
@@ -393,7 +408,7 @@ function run() {
         const x = reshapeResultToPaths(result);
         paths = x.paths;
         times = x.times;
-        draw();
+        play_loop();
 
         const steps = result.length / 10;
         statusEl.textContent = `OK — steps: ${steps.toLocaleString()} | points/body: ${paths[0].length.toLocaleString()} | compute: ${(t1 - t0).toFixed(1)} ms`;
@@ -406,7 +421,15 @@ function run() {
     }
 }
 
-runButton.addEventListener('click', run);
+runButton.addEventListener('click', () => {
+    if (runButton.innerText === 'Play') {
+        runButton.innerText = 'Pause';
+        play_loop();
+    } else {
+        runButton.innerText = 'Play';
+        run();
+    }
+});
 window.addEventListener('resize', draw);
 timeSlider.addEventListener('input', draw);
 exampleClassDropdown.addEventListener('change', () => {
