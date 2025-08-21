@@ -8,4 +8,4 @@ pub use runge_kutta::evolve as evolve_rk4;
 pub use velocity_verlet::evolve as evolve_verlet;
 pub use dop853::evolve as evolve_dop853;
 
-pub use crate::{types::Body, utils::total_energy};
+pub use crate::{types::Body, utils::total_energy, utils::total_angular_momentum};

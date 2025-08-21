@@ -1,5 +1,5 @@
 
-import init, { evolve } from './pkg/three_body_wasm.js';
+import init, { evolve, total_energy, total_angular_momentum } from './wasm/three_body_wasm.js';
 import unequal_mass from './examples/unequal_mass.js';
 import equal_mass from './examples/equal_mass.js';
 import choreographies from './examples/choreographies.js';
@@ -24,6 +24,8 @@ const exampleSelect = document.getElementById('example');
 let paths = [[], [], []];
 let masses = [1, 1, 1];
 let times = [];
+let energy = 0;
+let angularMomentum = [0, 0, 0];
 
 
 function getExampleValues() {
@@ -32,19 +34,7 @@ function getExampleValues() {
     let values;
     switch (exampleClass) {
         case 'choreographies':
-            switch (example) {
-                case 'getEight':
-                    values = choreographies.getEight();
-                    break;
-                case 'getLagrange':
-                    values = choreographies.getLagrange();
-                    break;
-                case 'getEuler':
-                    values = choreographies.getEuler();
-                    break;
-                default:
-                    throw new Error(`Unknown example: ${example}`);
-            }
+            values = choreographies.getOrbit(example);
             break;
         case 'free_fall':
             values = free_fall.getOrbit(example);
@@ -89,41 +79,23 @@ function fill_example_dropdown() {
     // Clear existing options
     exampleSelect.innerHTML = '';
     let examples;
-    if (exampleClass === 'free_fall' || exampleClass === 'unequal_mass' || exampleClass === 'equal_mass') {
-        // Special case for free fall, populate with specific examples
 
-        if (exampleClass === 'free_fall') {
-            examples = free_fall.getNames();
-        } else if (exampleClass === 'unequal_mass') {
-            examples = unequal_mass.getNames();
-        } else if (exampleClass === 'equal_mass') {
-            examples = equal_mass.getNames();
-        }
-        examples.forEach((name, index) => {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = name;
-            exampleSelect.appendChild(option);
-        });
-        return;
+    if (exampleClass === 'free_fall') {
+        examples = free_fall.getNames();
+    } else if (exampleClass === 'unequal_mass') {
+        examples = unequal_mass.getNames();
+    } else if (exampleClass === 'equal_mass') {
+        examples = equal_mass.getNames();
+    } else if (exampleClass === 'choreographies') {
+        examples = choreographies.getNames();
     }
-
-    
-    switch (exampleClass) {
-        case 'choreographies':
-            examples = choreographies;
-            break;
-        default:
-            throw new Error(`Unknown example class: ${exampleClass}`);
-    }
-
-    // Populate the example dropdown
-    for (const [key, value] of Object.entries(examples)) {
+    examples.forEach((name, index) => {
         const option = document.createElement('option');
-        option.value = key;
-        option.textContent = key;
+        option.value = index;
+        option.textContent = name;
         exampleSelect.appendChild(option);
-    }
+    });
+
 }
 
 function resizeCanvas() {
@@ -175,11 +147,18 @@ function makeProjector() {
     const scale = 0.9 * Math.min(w / dx, h / dy); // 10% margin
     const xMargin = (w - scale * dx) / 2;
     const yMargin = (h - scale * dy) / 2;
-    return function toCanvas(x, y) {
+    function toCanvas(x, y) {
         const cx = xMargin + scale * (x - bounds.minX);
         const cy = h - (yMargin + scale * (y - bounds.minY)); // y-up
         return [cx, cy];
     }
+    function fromCanvas(cx, cy) {
+        const x = (cx - xMargin) / scale + bounds.minX;
+        const y = bounds.maxY - (cy - yMargin) / scale;
+        return [x, y];
+    }
+
+    return { toCanvas, fromCanvas };
 }
 
 function drawLegend() {
@@ -196,6 +175,122 @@ function drawLegend() {
         row.appendChild(txt);
         legend.appendChild(row);
     });
+    const row = document.createElement('div');
+    const sw = document.createElement('span');
+    sw.className = 'swatch';
+    sw.style.background = 'transparent';
+    const txt = document.createElement('span');
+    txt.textContent = `Energy: ${energy}`;
+    row.appendChild(sw);
+    row.appendChild(txt);
+    legend.appendChild(row);
+
+    const row2 = document.createElement('div');
+    const sw2 = document.createElement('span');
+    sw2.className = 'swatch';
+    sw2.style.background = 'transparent';
+    const txt2 = document.createElement('span');
+    txt2.textContent = `Angular Momentum: ${angularMomentum[2]}`;
+    row2.appendChild(sw2);
+    row2.appendChild(txt2);
+    legend.appendChild(row2);
+}
+
+function drawAxis() {
+    ctx.save();
+
+    // Styles
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.fillStyle = '#cbd5e1';
+    ctx.lineWidth = 1;
+    ctx.font = '12px sans-serif';
+
+    const { toCanvas, fromCanvas } = makeProjector();
+    const [minX, maxY] = fromCanvas(0, 0);
+    const [maxX, minY] = fromCanvas(canvas.clientWidth, canvas.clientHeight);
+
+    // Helpers: nice tick step and formatting
+    function niceStep(range, target = 8) {
+        if (!isFinite(range) || range <= 0) return 1;
+        const rough = range / target;
+        const pow10 = Math.pow(10, Math.floor(Math.log10(rough)));
+        const frac = rough / pow10;
+        let nice;
+        if (frac < 1.5) nice = 1;
+        else if (frac < 3) nice = 2;
+        else if (frac < 7) nice = 5;
+        else nice = 10;
+        return nice * pow10;
+    }
+    function formatTick(v, step) {
+        const decimals = Math.max(0, -Math.floor(Math.log10(step)));
+        const s = (Math.abs(v) < 1e-12 ? 0 : v).toFixed(decimals);
+        return s.replace(/(\.\d*?[1-9])0+$/, '$1').replace(/\.$/, '');
+    }
+
+    // Tick step
+    const xStep = niceStep(maxX - minX, 8);
+    const yStep = niceStep(maxY - minY, 8);
+
+    // Margins for axes (5% inset from edges)
+    const margin = 6;
+    const xAxisY = canvas.clientHeight - margin; // bottom
+    const yAxisX = margin;                       // left
+
+    // Draw bottom X axis
+    ctx.beginPath();
+    ctx.moveTo(margin, xAxisY);
+    ctx.lineTo(canvas.clientWidth - margin, xAxisY);
+    ctx.stroke();
+
+    // Draw left Y axis
+    ctx.beginPath();
+    ctx.moveTo(yAxisX, margin);
+    ctx.lineTo(yAxisX, canvas.clientHeight - margin);
+    ctx.stroke();
+
+    const tick = 6;
+    const labelPad = 2;
+
+    // X ticks & labels
+    {
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        const start = Math.ceil(minX / xStep) * xStep;
+        for (let i = 0; i < 1000; i++) {
+            const xVal = start + i * xStep;
+            if (xVal > maxX + 1e-12) {
+                break;
+            }
+            const [tx, _] = toCanvas(xVal, minY); // map to canvas X pos
+            ctx.beginPath();
+            ctx.moveTo(tx, xAxisY);
+            ctx.lineTo(tx, xAxisY - tick);
+            ctx.stroke();
+            ctx.fillText(formatTick(xVal, xStep), tx, xAxisY - tick - labelPad);
+        }
+    }
+
+    // Y ticks & labels
+    {
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        const start = Math.ceil(minY / yStep) * yStep;
+        for (let i = 0; i < 1000; i++) {
+            const yVal = start + i * yStep;
+            if (yVal > maxY + 1e-12) {
+                break;
+            }
+            const [_, ty] = toCanvas(minX, yVal); // map to canvas Y pos
+            ctx.beginPath();
+            ctx.moveTo(yAxisX, ty);
+            ctx.lineTo(yAxisX + tick, ty);
+            ctx.stroke();
+            ctx.fillText(formatTick(yVal, yStep), yAxisX + tick + labelPad, ty);
+        }
+    }
+
+    ctx.restore();
 }
 
 // draws a subtle grid in the background
@@ -219,8 +314,9 @@ function draw() {
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
     drawGrid();
+    drawAxis();
 
-    const toCanvas = makeProjector();
+    const { toCanvas } = makeProjector();
 
     // percentage of computed time we are drawing
     const factor = parseFloat(timeSlider.value) / parseFloat(timeSlider.max);
@@ -287,6 +383,8 @@ function run() {
 
         const ic = readIC2D();
         masses = [ic[6], ic[13], ic[20]];
+        energy = total_energy(ic);
+        angularMomentum = total_angular_momentum(ic);
 
         const t0 = performance.now();
         const result = evolve(ic, t, method); // throws on Err(String)

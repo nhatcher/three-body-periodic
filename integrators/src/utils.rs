@@ -21,6 +21,24 @@ pub fn total_energy(bodies: &[Body]) -> f64 {
     ke + pe
 }
 
+/// Angular momentum
+pub fn total_angular_momentum(bodies: &[Body]) -> [f64; 3] {
+    let mut total = [0.0; 3];
+    for b in bodies {
+        total = add(total, cross(b.r, b.v));
+    }
+    total
+}
+
+#[inline]
+pub fn cross(a: [f64; 3], b: [f64; 3]) -> [f64; 3] {
+    [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    ]
+}
+
 #[inline]
 pub fn add(a: [f64; 3], b: [f64; 3]) -> [f64; 3] {
     [a[0] + b[0], a[1] + b[1], a[2] + b[2]]

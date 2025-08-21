@@ -71,6 +71,7 @@ pub fn evolve(bodies: &mut [Body], t_end: f64) -> (Vec<f64>, f64) {
         result.append(&mut bodies[0].r.to_vec());
         result.append(&mut bodies[1].r.to_vec());
         result.append(&mut bodies[2].r.to_vec());
+        result.push(t);
         step_rk4(bodies, h, eps2);
         t += h;
     }

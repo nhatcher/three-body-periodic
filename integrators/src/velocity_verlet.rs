@@ -36,14 +36,13 @@ fn step_velocity_verlet(bodies: &mut [Body], dt: f64, eps2: f64) {
     }
 }
 
-
 // put near your verlet code
 fn step_sym4(bodies: &mut [Body], h: f64, eps2: f64) {
     // Yoshida 4th-order coefficients
-    const CBR2: f64 = 1.259_921_049_894_873_2;           // 2^(1/3)
-    const DEN:  f64 = 2.0 - CBR2;
-    const W1:   f64 = 1.0 / DEN;                         // ≈ 1.3512071919596578
-    const W2:   f64 = -CBR2 / DEN;                       // ≈ -1.7024143839193153
+    const CBR2: f64 = 1.259_921_049_894_873_2; // 2^(1/3)
+    const DEN: f64 = 2.0 - CBR2;
+    const W1: f64 = 1.0 / DEN; // ≈ 1.3512071919596578
+    const W2: f64 = -CBR2 / DEN; // ≈ -1.7024143839193153
     step_velocity_verlet(bodies, W1 * h, eps2);
     step_velocity_verlet(bodies, W2 * h, eps2);
     step_velocity_verlet(bodies, W1 * h, eps2);
@@ -63,6 +62,7 @@ pub fn evolve(bodies: &mut [Body], t_end: f64) -> (Vec<f64>, f64) {
         result.append(&mut bodies[0].r.to_vec());
         result.append(&mut bodies[1].r.to_vec());
         result.append(&mut bodies[2].r.to_vec());
+        result.push(t);
         step_sym4(bodies, dt, eps2);
         t += dt;
     }
