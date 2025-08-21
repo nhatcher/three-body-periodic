@@ -1,8 +1,8 @@
 all:
 	cd wasm && wasm-pack build --target web
-	mkdir -p app/wasm
-	cp wasm/pkg/three_body_wasm.js app/wasm
-	cp wasm/pkg/three_body_wasm_bg.wasm app/wasm
+	mkdir -p docs/wasm
+	cp wasm/pkg/three_body_wasm.js docs/wasm
+	cp wasm/pkg/three_body_wasm_bg.wasm docs/wasm
 
 serve:
-	python -m http.server --directory app
+	python -m http.server --directory docs
