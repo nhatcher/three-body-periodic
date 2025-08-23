@@ -18,37 +18,6 @@
           <button class="primary" id="run">Pause</button>
         </div>
       </div>
-      <div class="control hidden">
-        <label for="time">Total time t (seconds)</label>
-        <input id="time" type="number" step="0.01" min="0.01" value="4.1761292190" />
-      </div>
-      <div class="control hidden">
-        <div class="label">Initial conditions (2D): x, y, vx, vy, mass</div>
-        <div class="grid-ic">
-          <div></div><div class="head">x</div><div class="head">y</div><div class="head">vx</div><div class="head">vy</div><div class="head">m</div>
-
-          <div>Body 1</div>
-          <input id="b1x" type="number" step="any" />
-          <input id="b1y" type="number" step="any" />
-          <input id="b1vx" type="number" step="any" />
-          <input id="b1vy" type="number" step="any" />
-          <input id="b1m" type="number" step="any" />
-
-          <div>Body 2</div>
-          <input id="b2x" type="number" step="any" />
-          <input id="b2y" type="number" step="any" />
-          <input id="b2vx" type="number" step="any" />
-          <input id="b2vy" type="number" step="any" />
-          <input id="b2m" type="number" step="any" />
-
-          <div>Body 3</div>
-          <input id="b3x" type="number" step="any" />
-          <input id="b3y" type="number" step="any" />
-          <input id="b3vx" type="number" step="any" />
-          <input id="b3vy" type="number" step="any" />
-          <input id="b3m" type="number" step="any" />
-        </div>
-      </div>
       <div class="control">
         <label for="example-class">Example class</label>
         <select id="example-class">
@@ -56,6 +25,7 @@
           <option value="equal_mass">Equal Mass</option>
           <option value="unequal_mass">Unequal Mass</option>
           <option value="choreographies">Choreographies</option>
+          <option value="3d_examples">Examples 3D</option>
           <!-- <option value="bhh_satellites_table_3">BHH Satellites Table 3</option>
           <option value="bhh_satellites_table_4">BHH Satellites Table 4</option> -->
         </select>

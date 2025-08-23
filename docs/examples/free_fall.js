@@ -243,9 +243,9 @@ function getOrbit(i) {
     const m = data[0].match(/^[A-Za-z]+\d*\(\s*([^)]*?)\s*\)$/);
     const [m1, m3, m2] = m[1].split(/\s*,\s*/).map(parseFloat);
     return [
-        [-0.5, 0, 0, 0, 0, 0, m1],
-        [x, y, 0, 0, 0, 0, m2],
-        [0.5, 0, 0, 0, 0, 0, m3],
+        [-0.5, 0, 0, 0, 0, 0, m1,
+            x, y, 0, 0, 0, 0, m2,
+            0.5, 0, 0, 0, 0, 0, m3],
         t
     ];
 }
