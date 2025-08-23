@@ -43,14 +43,14 @@ async function loadTSV(url) {
 
 async function getNames() {
     if (!data) {
-        await loadTSV('/3d/data.csv');
+        await loadTSV('./3d/data.csv');
     }
     return data.map(item => item[0]);
 }
 
 async function getOrbitData(i) {
     if (!data) {
-        await loadTSV('/3d/data.csv');
+        await loadTSV('./3d/data.csv');
     }
     const row = data[i];
     const m = row[0].match(/^[^\()]+\(([^)]+)\)$/);
