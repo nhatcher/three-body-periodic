@@ -45,6 +45,9 @@ header h1 {
   flex-direction: column;
   gap: 6px;
 }
+.hidden {
+  display: none;
+}
 label {
   color: var(--muted);
   font-size: 12px;
@@ -79,7 +82,7 @@ button:disabled {
 
 .wrap {
   display: grid;
-  grid-template-rows: auto 1fr;
+  /* grid-template-rows: auto 1fr; */
   height: 100%;
 }
 
@@ -127,7 +130,7 @@ button:disabled {
 .status {
   color: var(--muted);
   font-size: 12px;
-  margin-left: auto;
+  margin-left: 12px;
 }
 .error {
   color: #ff6a6a;

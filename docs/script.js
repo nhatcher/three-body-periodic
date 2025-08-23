@@ -4,6 +4,7 @@ import unequal_mass from './examples/unequal_mass.js';
 import equal_mass from './examples/equal_mass.js';
 import choreographies from './examples/choreographies.js';
 import free_fall from './examples/free_fall.js';
+import { recordWebM } from './video.js';
 
 await init();
 
@@ -13,7 +14,6 @@ const canvas = document.getElementById('plot');
 const wrap = document.getElementById('canvasWrap');
 const ctx = canvas.getContext('2d');
 const statusEl = document.getElementById('status');
-const methodEl = document.getElementById('method');
 const timeEl = document.getElementById('time');
 const runButton = document.getElementById('run');
 const timeSlider = document.getElementById('control-time');
@@ -175,25 +175,27 @@ function drawLegend() {
         row.appendChild(txt);
         legend.appendChild(row);
     });
+
+    // Energy
     const row = document.createElement('div');
-    const sw = document.createElement('span');
-    sw.className = 'swatch';
-    sw.style.background = 'transparent';
     const txt = document.createElement('span');
     txt.textContent = `Energy: ${energy}`;
-    row.appendChild(sw);
     row.appendChild(txt);
     legend.appendChild(row);
 
+    // Angular Momentum
     const row2 = document.createElement('div');
-    const sw2 = document.createElement('span');
-    sw2.className = 'swatch';
-    sw2.style.background = 'transparent';
     const txt2 = document.createElement('span');
     txt2.textContent = `Angular Momentum: ${angularMomentum[2]}`;
-    row2.appendChild(sw2);
     row2.appendChild(txt2);
     legend.appendChild(row2);
+
+    // Period
+    const row3 = document.createElement('div');
+    const txt3 = document.createElement('span');
+    txt3.textContent = `Period: ${timeEl.value} seconds`;
+    row3.appendChild(txt3);
+    legend.appendChild(row3);
 }
 
 function drawAxis() {
@@ -330,7 +332,7 @@ function draw() {
         const [x0, y0] = toCanvas(pts[0][0], pts[0][1]);
         ctx.moveTo(x0, y0);
         let k = 1;
-        for (k = 1; k < l && times[k] < factor * times[times.length - 1]; k++) {
+        for (k = 1; k < l && times[k] <= factor * times[times.length - 1]; k++) {
             const [x, y] = toCanvas(pts[k][0], pts[k][1]);
             ctx.lineTo(x, y);
         }
@@ -390,19 +392,22 @@ function run() {
     runButton.disabled = true;
     statusEl.classList.remove('error');
     try {
-        const method = methodEl.value; // 'rk4' or 'verlet'
-        const t = Number(timeEl.value);
+        const t = parseFloat(timeEl.value);
         if (!isFinite(t) || t <= 0) {
             throw new Error('Time t must be a positive number.');
         }
 
+        // Read the initial conditions and compute the orbit parameters
         const ic = readIC2D();
         masses = [ic[6], ic[13], ic[20]];
         energy = total_energy(ic);
         angularMomentum = total_angular_momentum(ic);
 
         const t0 = performance.now();
-        const result = evolve(ic, t, method); // throws on Err(String)
+        // method: 'dop853', 'rk4' or 'verlet'
+        // dop853 outperforms rk4 and verlet in all circumstances
+        // throws on Err(String)
+        const result = evolve(ic, t, "dop853");
         const t1 = performance.now();
 
         const x = reshapeResultToPaths(result);
@@ -443,6 +448,16 @@ exampleSelect.addEventListener('change', () => {
 });
 
 
+const recordBtn = document.getElementById('record');
+
+recordBtn.addEventListener('click', async () => {
+    recordBtn.disabled = true;
+    try {
+        await recordWebM(timeSlider, canvas, draw);
+    } finally {
+        recordBtn.disabled = false;
+    }
+});
 
 // First render with defaults
 fill_example_dropdown();
