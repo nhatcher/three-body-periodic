@@ -327,19 +327,24 @@ function draw3D(paths, times, masses, energy, angularMomentum, period) {
     });
 }
 
+function redraw() {
+    // A bit of a hack :)
+    window.dispatchEvent(new Event('resize'));
+}
+
 
 // Mouse drag to orbit
 let dragging = false, lastX = 0, lastY = 0;
 
-canvas.addEventListener('mousedown', (e) => {
+canvas.addEventListener('pointerdown', (e) => {
     if (exampleClassDropdown.value === '3d_examples') {
         dragging = true;
         lastX = e.clientX;
         lastY = e.clientY;
     }
 });
-window.addEventListener('mouseup', () => dragging = false);
-window.addEventListener('mousemove', (e) => {
+window.addEventListener('pointerup', () => dragging = false);
+window.addEventListener('pointermove', (e) => {
     if (!dragging || exampleClassDropdown.value !== '3d_examples') {
         return;
     }
@@ -350,7 +355,7 @@ window.addEventListener('mousemove', (e) => {
     camera.yaw += dx * 0.01;
     camera.pitch += dy * 0.01;
     camera.pitch = Math.max(-Math.PI / 2 + 0.01, Math.min(Math.PI / 2 - 0.01, camera.pitch));
-    draw3D();
+    redraw();
 });
 
 // Wheel to zoom
@@ -361,7 +366,7 @@ canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
     const factor = Math.pow(1.001, e.deltaY);
     camera.zoom = Math.min(10, Math.max(1.2, camera.zoom * factor));
-    draw3D();
+    redraw();
 }, { passive: false });
 
 // End mouse controls
