@@ -97,27 +97,61 @@ window.addEventListener('resize', draw);
 timeSlider.addEventListener('input', draw);
 exampleClassDropdown.addEventListener('change', async () => {
     await fill_example_dropdown();
+    updateUrl();
     await run();
     play_loop();
 });
 exampleSelect.addEventListener('change', async () => {
+    updateUrl();
     await run();
     play_loop();
 });
 
+function updateUrl() {
+    const params = new URLSearchParams(window.location.search);
 
-const recordBtn = document.getElementById('record');
+    params.set("class", exampleClassDropdown.value);
+    params.set("index", exampleSelect.value);
 
-recordBtn.addEventListener('click', async () => {
-    recordBtn.disabled = true;
-    try {
-        await recordWebM(timeSlider, canvas, draw);
-    } finally {
-        recordBtn.disabled = false;
+    const newUrl = window.location.pathname + "?" + params.toString();
+
+    // We don’t want to clutter history (otherwise we could use pushState)
+    window.history.replaceState({}, "", newUrl);
+}
+
+
+// const recordBtn = document.getElementById('record');
+
+// recordBtn.addEventListener('click', async () => {
+//     recordBtn.disabled = true;
+//     try {
+//         await recordWebM(timeSlider, canvas, draw);
+//     } finally {
+//         recordBtn.disabled = false;
+//     }
+// });
+
+async function fillFromURL() {
+    const params = new URLSearchParams(window.location.search);
+
+    // Example: ?class=equal_mass&index=3
+    const classParam = params.get("class");   // e.g. "equal_mass"
+    const indexParam = params.get("index");   // e.g. "3"
+
+
+    // Apply to dropdowns if values exist
+    if (classParam) {
+        exampleClassDropdown.value = classParam;
     }
-});
+    await fill_example_dropdown();
 
-// First render with defaults
-await fill_example_dropdown();
+    if (indexParam) {
+        exampleSelect.value = indexParam;
+    }
+}
+
+
+await fillFromURL();
+
 await run();
 play_loop();

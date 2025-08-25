@@ -127,10 +127,15 @@ button:disabled {
   border-radius: 3px;
   display: inline-block;
 }
-.status {
+#footer {
   color: var(--muted);
   font-size: 12px;
   margin-left: 12px;
+  margin-right: 12px;
+  display: flex;
+}
+.spacer {
+  flex-grow: 1;
 }
 .error {
   color: #ff6a6a;
@@ -160,4 +165,3 @@ input[type="range"] {
   width: 260px;
   accent-color: var(--accent);
 }
-

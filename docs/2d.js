@@ -7,6 +7,7 @@ const canvas = document.getElementById('plot');
 const ctx = canvas.getContext('2d');
 const timeSlider = document.getElementById('control-time');
 let toCanvas, fromCanvas;
+const exampleClassDropdown = document.getElementById('example-class');
 
 function computeBounds(paths) {
     let minX = +Infinity, minY = +Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -149,6 +150,7 @@ function draw2D(paths, times, masses, energy, angularMomentum, period) {
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
     makeProjector(paths);
+    attachCoordEventsOnce();
 
     drawGrid();
     drawAxis();
@@ -180,6 +182,36 @@ function draw2D(paths, times, masses, energy, angularMomentum, period) {
         const [ex, ey] = toCanvas(pts[k - 1][0], pts[k - 1][1]);
         ctx.beginPath(); ctx.arc(ex, ey, 5, 0, Math.PI * 2); ctx.fillStyle = colors[i]; ctx.fill();
     });
+}
+
+
+
+
+const coordsEl = document.getElementById('coords');
+
+function onMouseMove(e) {
+  if (!fromCanvas || exampleClassDropdown.value === '3d_examples') {
+    coordsEl.textContent = '';
+    return;
+  }
+  const rect = canvas.getBoundingClientRect();
+  const cx = e.clientX - rect.left;
+  const cy = e.clientY - rect.top;
+  const [x, y] = fromCanvas(cx, cy);
+  coordsEl.textContent = `x: ${x}   y: ${y}`;
+}
+
+function onMouseLeave() {
+  coordsEl.textContent = '';
+}
+
+// Attach once
+let coordsEventsAttached = false;
+function attachCoordEventsOnce() {
+  if (coordsEventsAttached) return;
+  canvas.addEventListener('mousemove', onMouseMove);
+  canvas.addEventListener('mouseleave', onMouseLeave);
+  coordsEventsAttached = true;
 }
 
 

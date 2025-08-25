@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Three-Body (WASM) — RK4 / Velocity-Verlet Canvas</title>
+  <title>Three-Body Simulation</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -14,7 +14,7 @@
         <label for="control-time">Playback (0 → t)</label>
         <input id="control-time" type="range" min="0" max="1000" step="1" value="1000" />
         <div>
-          <button id="record" class="primary">Record video</button>
+          <!-- <button id="record" class="primary">Record video</button> -->
           <button class="primary" id="run">Pause</button>
         </div>
       </div>
@@ -41,7 +41,11 @@
     <canvas id="plot"></canvas>
     <div class="legend" id="legend"></div>
   </div>
+  <div id="footer">
   <div class="status" id="status"></div>
+  <div class="spacer"></div>
+  <div class="coords" id="coords"></div>
+  </div>
 </div>
 
 <script type="module" src="script.js"></script>
