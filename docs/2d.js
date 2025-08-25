@@ -6,6 +6,7 @@ import { colors } from "./common.js";
 const canvas = document.getElementById('plot');
 const ctx = canvas.getContext('2d');
 const timeSlider = document.getElementById('control-time');
+let toCanvas, fromCanvas;
 
 function computeBounds(paths) {
     let minX = +Infinity, minY = +Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -29,12 +30,12 @@ function makeProjector(paths) {
     const scale = 0.9 * Math.min(w / dx, h / dy); // 10% margin
     const xMargin = (w - scale * dx) / 2;
     const yMargin = (h - scale * dy) / 2;
-    function toCanvas(x, y) {
+    toCanvas = (x, y) => {
         const cx = xMargin + scale * (x - bounds.minX);
         const cy = h - (yMargin + scale * (y - bounds.minY)); // y-up
         return [cx, cy];
-    }
-    function fromCanvas(cx, cy) {
+    };
+    fromCanvas = (cx, cy) => {
         const x = (cx - xMargin) / scale + bounds.minX;
         const y = bounds.maxY - (cy - yMargin) / scale;
         return [x, y];
@@ -45,21 +46,29 @@ function makeProjector(paths) {
 
 // draws a subtle grid in the background
 function drawGrid() {
+    const [minX, maxY] = fromCanvas(0, 0);
+    const [maxX, minY] = fromCanvas(canvas.clientWidth, canvas.clientHeight);
+
+    // Tick step
+    const xStep = niceStep(maxX - minX, 8);
+    const yStep = niceStep(maxY - minY, 8);
     ctx.save();
-    ctx.globalAlpha = 0.2;
-    const step = 80;
-    for (let x = 0; x < canvas.clientWidth; x += step) {
+    ctx.globalAlpha = 0.8;
+
+    for (let xVal = Math.ceil(minX / xStep) * xStep; xVal < maxX; xVal += xStep) {
+        const [tx, _] = toCanvas(xVal, minY); // map to canvas X pos
         ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.clientHeight);
+        ctx.moveTo(tx, 0);
+        ctx.lineTo(tx, canvas.clientHeight);
         ctx.lineWidth = 1;
         ctx.strokeStyle = '#1b2647';
         ctx.stroke();
     }
-    for (let y = 0; y < canvas.clientHeight; y += step) {
+    for (let yVal = Math.ceil(minY / yStep) * yStep; yVal < maxY; yVal += yStep) {
+        const [_, ty] = toCanvas(minX, yVal); // map to canvas Y pos
         ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.clientWidth, y);
+        ctx.moveTo(0, ty);
+        ctx.lineTo(canvas.clientWidth, ty);
         ctx.lineWidth = 1;
         ctx.strokeStyle = '#1b2647';
         ctx.stroke();
@@ -68,7 +77,7 @@ function drawGrid() {
 }
 
 
-function drawAxis(paths) {
+function drawAxis() {
     ctx.save();
 
     // Styles
@@ -77,7 +86,6 @@ function drawAxis(paths) {
     ctx.lineWidth = 1;
     ctx.font = '12px sans-serif';
 
-    const { toCanvas, fromCanvas } = makeProjector(paths);
     const [minX, maxY] = fromCanvas(0, 0);
     const [maxX, minY] = fromCanvas(canvas.clientWidth, canvas.clientHeight);
 
@@ -106,42 +114,30 @@ function drawAxis(paths) {
     const labelPad = 2;
 
     // X ticks & labels
-    {
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-        const start = Math.ceil(minX / xStep) * xStep;
-        for (let i = 0; i < 1000; i++) {
-            const xVal = start + i * xStep;
-            if (xVal > maxX + 1e-12) {
-                break;
-            }
-            const [tx, _] = toCanvas(xVal, minY); // map to canvas X pos
-            ctx.beginPath();
-            ctx.moveTo(tx, xAxisY);
-            ctx.lineTo(tx, xAxisY - tick);
-            ctx.stroke();
-            ctx.fillText(formatTick(xVal, xStep), tx, xAxisY - tick - labelPad);
-        }
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    for (let xVal = Math.ceil(minX / xStep) * xStep; xVal < maxX; xVal += xStep) {
+        const [tx, _] = toCanvas(xVal, minY); // map to canvas X pos
+        ctx.beginPath();
+        ctx.moveTo(tx, xAxisY);
+        ctx.lineTo(tx, xAxisY - tick);
+        ctx.stroke();
+        ctx.fillText(formatTick(xVal, xStep), tx, xAxisY - tick - labelPad);
     }
 
+
     // Y ticks & labels
-    {
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        const start = Math.ceil(minY / yStep) * yStep;
-        for (let i = 0; i < 1000; i++) {
-            const yVal = start + i * yStep;
-            if (yVal > maxY + 1e-12) {
-                break;
-            }
-            const [_, ty] = toCanvas(minX, yVal); // map to canvas Y pos
-            ctx.beginPath();
-            ctx.moveTo(yAxisX, ty);
-            ctx.lineTo(yAxisX + tick, ty);
-            ctx.stroke();
-            ctx.fillText(formatTick(yVal, yStep), yAxisX + tick + labelPad, ty);
-        }
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    for (let yVal = Math.ceil(minY / yStep) * yStep; yVal < maxY; yVal += yStep) {
+        const [_, ty] = toCanvas(minX, yVal); // map to canvas Y pos
+        ctx.beginPath();
+        ctx.moveTo(yAxisX, ty);
+        ctx.lineTo(yAxisX + tick, ty);
+        ctx.stroke();
+        ctx.fillText(formatTick(yVal, yStep), yAxisX + tick + labelPad, ty);
     }
+
 
     ctx.restore();
 }
@@ -152,10 +148,10 @@ function draw2D(paths, times, masses, energy, angularMomentum, period) {
 
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 
-    drawGrid();
-    drawAxis(paths);
+    makeProjector(paths);
 
-    const { toCanvas } = makeProjector(paths);
+    drawGrid();
+    drawAxis();
 
     // percentage of computed time we are drawing
     const factor = parseFloat(timeSlider.value) / parseFloat(timeSlider.max);
