@@ -1,12 +1,23 @@
-
-import init, { evolve, total_energy, total_angular_momentum } from './wasm/three_body_wasm.js';
 import { recordWebM } from './video.js';
 import { draw2D } from './2d.js';
 import { draw3D } from './3d.js';
 import { fill_example_dropdown, readIC2D } from './ic.js';
 import { reshapeResultToPaths } from './util.js';
 
-await init();
+
+const simWorker = new Worker(new URL('./sim-worker.js', import.meta.url), { type: 'module' });
+
+let workerReady = new Promise((resolve) => {
+  const onMsg = (evt) => {
+    if (evt.data?.type === 'ready') {
+      simWorker.removeEventListener('message', onMsg);
+      resolve();
+    }
+  };
+  simWorker.addEventListener('message', onMsg);
+});
+
+await workerReady;
 
 // Globals
 const canvas = document.getElementById('plot');
@@ -15,6 +26,7 @@ const runButton = document.getElementById('run');
 const timeSlider = document.getElementById('control-time');
 const exampleClassDropdown = document.getElementById('example-class');
 const exampleSelect = document.getElementById('example');
+const methodSelect = document.getElementById('method');
 
 // Runtime
 let paths = [[], [], []];
@@ -23,6 +35,11 @@ let times = [];
 let energy = 0;
 let angularMomentum = [0, 0, 0];
 let period = 0;
+
+
+// For racing requests (dropdown changes quickly, etc.)
+let nextRequestId = 1;
+let latestRequestId = 0;
 
 
 function play_loop() {
@@ -46,25 +63,55 @@ async function run() {
     statusEl.classList.remove('error');
     try {
         // Read the initial conditions and compute the orbit parameters
-        const [ic, t] = await readIC2D();
-        masses = [ic[6], ic[13], ic[20]];
-        energy = total_energy(ic);
-        angularMomentum = total_angular_momentum(ic);
+        const [icRaw, t] = await readIC2D();
+        masses = [icRaw[6], icRaw[13], icRaw[20]];
+        period = t;
 
-        const t0 = performance.now();
-        // method: 'dop853', 'rk4' or 'verlet'
-        // dop853 outperforms rk4 and verlet in all circumstances
-        // throws on Err(String)
-        const result = evolve(ic, t, "dop853");
-        const t1 = performance.now();
+        const ic = new Float64Array(icRaw);
+
+        // Kick off worker job
+        const requestId = nextRequestId++;
+        latestRequestId = requestId;
+
+        const resultPromise = new Promise((resolve, reject) => {
+            const onMessage = (evt) => {
+                const msg = evt.data;
+                if (!msg || msg.requestId !== requestId) {
+                    return;
+                }
+
+                simWorker.removeEventListener('message', onMessage);
+
+                if (msg.type === 'error') {
+                    reject(new Error(msg.message));
+                } else {
+                    resolve(msg);
+                }
+            };
+            simWorker.addEventListener('message', onMessage);
+        });
+        const method = methodSelect.value;
+
+        // Post to worker; transfer the IC buffer (we won't need it again on main)
+        simWorker.postMessage({ requestId, ic, t, method }, [ic.buffer]);
+
+        const { result, energy: E, angularMomentum: L, computeMs } = await resultPromise;
+
+        // Ignore stale responses (if the user changed selection mid-flight)
+        if (requestId !== latestRequestId) {
+            return;
+        }
+
+        energy = E;
+        angularMomentum = Array.from(L);
+
 
         const x = reshapeResultToPaths(result);
         paths = x.paths;
         times = x.times;
-        period = t;
 
         const steps = result.length / 10;
-        statusEl.textContent = `OK — steps: ${steps.toLocaleString()} | points/body: ${paths[0].length.toLocaleString()} | compute: ${(t1 - t0).toFixed(1)} ms`;
+        statusEl.textContent = `OK — steps: ${steps.toLocaleString()} | points/body: ${paths[0].length.toLocaleString()} | compute: ${computeMs.toFixed(1)} ms`;
     } catch (err) {
         console.error(err);
         statusEl.textContent = 'Error: ' + (err?.message || String(err));
@@ -80,7 +127,6 @@ runButton.addEventListener('click', () => {
         play_loop();
     } else {
         runButton.innerText = 'Play';
-        run();
         play_loop();
     }
 });
@@ -103,6 +149,10 @@ exampleClassDropdown.addEventListener('change', async () => {
 });
 exampleSelect.addEventListener('change', async () => {
     updateUrl();
+    await run();
+    play_loop();
+});
+methodSelect.addEventListener('change', async () => {
     await run();
     play_loop();
 });

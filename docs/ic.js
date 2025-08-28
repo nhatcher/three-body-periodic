@@ -3,6 +3,8 @@ import equal_mass from './examples/equal_mass.js';
 import choreographies from './examples/choreographies.js';
 import free_fall from './examples/free_fall.js';
 import examples3d from './examples/3d_examples.js';
+import custom_examples from './examples/custom.js';
+import free_fall_large from './examples/free_fall_large.js';
 
 const exampleClassDropdown = document.getElementById('example-class');
 const exampleSelect = document.getElementById('example');
@@ -26,6 +28,13 @@ async function readIC2D() {
             break;
         case '3d_examples':
             values = await examples3d.getOrbit(example);
+            break;
+        case 'custom':
+            values = await custom_examples.getOrbit(example);
+            break;
+        case 'free_fall_large':
+            values = await free_fall_large.getOrbit(example);
+            break;
     }
     return values;
 }
@@ -56,6 +65,18 @@ async function fill_example_dropdown() {
         case '3d_examples':
             examples = await examples3d.getNames();
             break;
+        case 'free_fall_large':
+            examples = await free_fall_large.getNames();
+            break;
+        case 'custom':
+            examples = custom_examples.getNames();
+            examples.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                exampleSelect.appendChild(option);
+            });
+            return;
     }
     examples.forEach((name, index) => {
         const option = document.createElement('option');

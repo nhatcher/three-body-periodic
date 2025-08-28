@@ -27,12 +27,7 @@ header {
   z-index: 10;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
 }
-header h1 {
-  font-size: 16px;
-  margin: 0 8px 0 0;
-  font-weight: 600;
-  white-space: nowrap;
-}
+
 .controls {
   display: flex;
   flex-wrap: wrap;

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Three-Body Simulation</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="modal.css" />
 </head>
 <body>
 <div class="wrap">
@@ -15,7 +16,15 @@
         <input id="control-time" type="range" min="0" max="1000" step="1" value="1000" />
         <div>
           <!-- <button id="record" class="primary">Record video</button> -->
+          <button id="new-example" class="primary">Edit</button>
           <button class="primary" id="run">Pause</button>
+          <select id="method">
+            <option value="dop853">DOP853 (high accuracy)</option>
+            <option value="rk4">RK4 (low accuracy)</option>
+            <option value="verlet">Velocity Verlet (low accuracy)</option>
+            <!-- <option value="dop853_hp">DOP853 (high precision)</option> -->
+            <option value="feagin14">Feagin14 (high precision)</option>
+          </select>
         </div>
       </div>
       <div class="control">
@@ -26,6 +35,8 @@
           <option value="unequal_mass">Unequal Mass</option>
           <option value="choreographies">Choreographies</option>
           <option value="3d_examples">Examples 3D</option>
+          <option value="free_fall_large">Free Fall Large</option>
+          <option value="custom">Custom Examples</option>
           <!-- <option value="bhh_satellites_table_3">BHH Satellites Table 3</option>
           <option value="bhh_satellites_table_4">BHH Satellites Table 4</option> -->
         </select>
@@ -48,6 +59,70 @@
   </div>
 </div>
 
+<dialog id="new-example-dialog" aria-labelledby="new-example-title">
+  <form method="dialog" id="new-example-form" class="modal">
+    <h2 id="new-example-title">New 3-Body Initial Conditions (IC)</h2>
+
+    <label class="stack">
+      <span class="label">Name</span>
+      <input type="text" id="ex-name" placeholder="e.g. My custom ICs" required />
+    </label>
+
+    <div class="modal-grid">
+      <div class="head"></div>
+      <div class="head">Mass</div>
+      <div class="head">x</div>
+      <div class="head">y</div>
+      <div class="head">z</div>
+      <div class="head">v<sub>x</sub></div>
+      <div class="head">v<sub>y</sub></div>
+      <div class="head">v<sub>z</sub></div>
+
+      <!-- Body 1 -->
+      <div class="row-label">Body 1</div>
+      <input inputmode="decimal" required id="modal-m1"  placeholder="1"   />
+      <input inputmode="decimal" required id="modal-x1"  placeholder="0.0" />
+      <input inputmode="decimal" required id="modal-y1"  placeholder="0.0" />
+      <input inputmode="decimal" required id="modal-z1"  placeholder="0.0" />
+      <input inputmode="decimal" required id="modal-vx1" placeholder="0.1" />
+      <input inputmode="decimal" required id="modal-vy1" placeholder="0.0" />
+      <input inputmode="decimal" required id="modal-vz1" placeholder="0.0" />
+
+      <!-- Body 2 -->
+      <div class="row-label">Body 2</div>
+      <input inputmode="decimal" required id="modal-m2"  placeholder="1"   />
+      <input inputmode="decimal" required id="modal-x2"  placeholder="1.0" />
+      <input inputmode="decimal" required id="modal-y2"  placeholder="0.0" />
+      <input inputmode="decimal" required id="modal-z2"  placeholder="0.0" />
+      <input inputmode="decimal" required id="modal-vx2" placeholder="0.0" />
+      <input inputmode="decimal" required id="modal-vy2" placeholder="0.1" />
+      <input inputmode="decimal" required id="modal-vz2" placeholder="0.0" />
+
+      <!-- Body 3 -->
+      <div class="row-label">Body 3</div>
+      <input inputmode="decimal" required id="modal-m3"  placeholder="1"   />
+      <input inputmode="decimal" required id="modal-x3"  placeholder="-1.0"/>
+      <input inputmode="decimal" required id="modal-y3"  placeholder="0.0" />
+      <input inputmode="decimal" required id="modal-z3"  placeholder="0.0" />
+      <input inputmode="decimal" required id="modal-vx3" placeholder="0.0" />
+      <input inputmode="decimal" required id="modal-vy3" placeholder="-0.1"/>
+      <input inputmode="decimal" required id="modal-vz3" placeholder="0.0" />
+
+      <div class="row-label">Period</div>
+      <input inputmode="decimal" required id="modal-period"  placeholder="1"   />
+    </div>
+    
+
+    <menu class="modal-actions">
+      <button value="primary" type="button" id="delete-new-ex">Delete</button>
+      <button value="cancel" type="button" id="cancel-new-ex">Cancel</button>
+      <button class="primary" value="submit" id="create-new-ex">Save</button>
+    </menu>
+  </form>
+</dialog>
+
+
 <script type="module" src="script.js"></script>
+<script type="module" src="modal.js"></script>
 </body>
 </html>
