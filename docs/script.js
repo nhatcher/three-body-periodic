@@ -35,6 +35,7 @@ let times = [];
 let energy = 0;
 let angularMomentum = [0, 0, 0];
 let period = 0;
+let 𝜃_max = 0;  // max angle (for BHH examples)
 
 
 // For racing requests (dropdown changes quickly, etc.)
@@ -64,9 +65,10 @@ async function run() {
     statusEl.classList.remove('error');
     try {
         // Read the initial conditions and compute the orbit parameters
-        const [icRaw, t] = await readIC2D();
+        const [icRaw, t, theta_max] = await readIC2D();
         masses = [icRaw[6], icRaw[13], icRaw[20]];
         period = t;
+        𝜃_max = theta_max || 0;
 
         const ic = new Float64Array(icRaw);
 
@@ -139,7 +141,7 @@ function draw() {
     if (exampleClassDropdown.value === '3d_examples') {
         draw3D(paths, times, masses, energy, angularMomentum, period);
     } else {
-        draw2D(paths, times, masses, energy, angularMomentum, period);
+        draw2D(paths, times, masses, energy, angularMomentum, period, 𝜃_max);
     }
 }
 

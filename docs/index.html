@@ -45,8 +45,7 @@
           <option value="free_fall_puzynin_sd">Free Fall (symmetric Puzynin)</option>
           <option value="free_fall_puzynin_600">Free Fall (first 600, Puzynin)</option>
           <option value="custom">Custom Examples</option>
-          <!-- <option value="bhh_satellites_table_3">BHH Satellites Table 3</option>
-          <option value="bhh_satellites_table_4">BHH Satellites Table 4</option> -->
+          <option value="bhh_satellites">BHH Satellites</option>
         </select>
         <label for="example">Select example</label>
         <select id="example">
@@ -222,9 +221,15 @@
   <p>Some of this orbits require a multiple precision method for their solution</p>
 </template>
 
+<template id="help-example-class-bhh_satellites">
+  <h2 id="info-title">BBH Satellites</h2>
+  <p>These are not periodic orbits, this are periodic in a rotating frame of reference</p>
+</template>
+
+
 <template id="help-example-class-custom">
   <h2 id="info-title">Custom examples</h2>
-  <p>Yo can create those examples by clicking edit.</p>
+  <p>You can create those examples by clicking edit.</p>
 </template>
 
 <script type="module" src="script.js"></script>

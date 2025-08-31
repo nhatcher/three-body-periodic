@@ -143,7 +143,18 @@ function drawAxis() {
     ctx.restore();
 }
 
-function draw2D(paths, times, masses, energy, angularMomentum, period) {
+
+function rotate(p, q, w, time) {
+    if (w === 0) {
+        return [p, q];
+    }
+    const 𝜃 = -w*time;
+    const p1 = p*Math.cos(𝜃) - q*Math.sin(𝜃);
+    const q1 = p*Math.sin(𝜃) + q*Math.cos(𝜃);
+    return [p1, q1];
+}
+
+function draw2D(paths, times, masses, energy, angularMomentum, period, 𝜃_max) {
     resizeCanvas();
     drawLegend(masses, energy, angularMomentum, period);
 
@@ -157,6 +168,7 @@ function draw2D(paths, times, masses, energy, angularMomentum, period) {
 
     // percentage of computed time we are drawing
     const factor = parseFloat(timeSlider.value) / parseFloat(timeSlider.max);
+    const w = 𝜃_max / period;
 
     paths.forEach((pts, i) => {
         const l = pts.length;
@@ -167,8 +179,9 @@ function draw2D(paths, times, masses, energy, angularMomentum, period) {
         const [x0, y0] = toCanvas(pts[0][0], pts[0][1]);
         ctx.moveTo(x0, y0);
         let k = 1;
-        for (k = 1; k < l && times[k] <= factor * times[times.length - 1]; k++) {
-            const [x, y] = toCanvas(pts[k][0], pts[k][1]);
+        for (k = 1; k < l && times[k] <= factor * period; k++) {
+            const [p1, q1] = rotate(pts[k][0], pts[k][1], w, times[k]);
+            const [x, y] = toCanvas(p1, q1);
             ctx.lineTo(x, y);
         }
         ctx.lineWidth = 2.0; ctx.strokeStyle = colors[i]; ctx.stroke();
@@ -179,7 +192,8 @@ function draw2D(paths, times, masses, energy, angularMomentum, period) {
         ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2); ctx.strokeStyle = colors[i]; ctx.stroke();
 
         // End marker
-        const [ex, ey] = toCanvas(pts[k - 1][0], pts[k - 1][1]);
+        const [p, q] = rotate(pts[k - 1][0], pts[k - 1][1], w, times[k-1]);
+        const [ex, ey] = toCanvas(p, q);
         ctx.beginPath(); ctx.arc(ex, ey, 5, 0, Math.PI * 2); ctx.fillStyle = colors[i]; ctx.fill();
     });
 }

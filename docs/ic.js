@@ -6,6 +6,7 @@ import examples3d from './examples/3d_examples.js';
 import custom_examples from './examples/custom.js';
 import free_fall_puzynin_sd from './examples/free_fall_puzynin_sd.js';
 import free_fall_puzynin_600 from './examples/free_fall_puzynin_600.js';
+import bhh_satellites from './examples/bhh_satellites.js';
 
 const exampleClassDropdown = document.getElementById('example-class');
 const exampleSelect = document.getElementById('example');
@@ -38,6 +39,9 @@ async function readIC2D() {
             break;
         case 'free_fall_puzynin_600':
             values = await free_fall_puzynin_600.getOrbit(example);
+            break;
+        case 'bhh_satellites':
+            values = bhh_satellites.getOrbit(example);
             break;
         default:
             throw new Error(`Unknown example class: ${exampleClass}`);
@@ -76,6 +80,9 @@ async function fill_example_dropdown() {
             break;
         case 'free_fall_puzynin_600':
             examples = await free_fall_puzynin_600.getNames();
+            break;
+        case 'bhh_satellites':
+            examples = bhh_satellites.getNames();
             break;
         case 'custom':
             examples = custom_examples.getNames();
