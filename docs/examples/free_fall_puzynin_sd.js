@@ -17,14 +17,14 @@ async function loadTSV(url) {
 
 async function getNames() {
     if (!data) {
-        await loadTSV('./examples/sol_81.csv');
+        await loadTSV('./examples/sd_80.csv');
     }
-    return data.map((_, index) => index.toString());
+    return data.map((_, index) => `data${index+1}`);
 }
 
 async function getOrbit(i) {
     if (!data) {
-        await loadTSV('./examples/sol_81.csv');
+        await loadTSV('./examples/sd_80.csv');
     }
     const row = data[i];
     const m1 = 1;

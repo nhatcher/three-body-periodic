@@ -1,5 +1,5 @@
 import { recordWebM } from './video.js';
-import { draw2D } from './2d.js';
+import { clear2D, draw2D } from './2d.js';
 import { draw3D } from './3d.js';
 import { fill_example_dropdown, readIC2D } from './ic.js';
 import { reshapeResultToPaths } from './util.js';
@@ -59,6 +59,7 @@ function play_loop() {
 
 
 async function run() {
+    runButton.innerText = 'Play';
     runButton.disabled = true;
     statusEl.classList.remove('error');
     try {
@@ -91,6 +92,9 @@ async function run() {
             simWorker.addEventListener('message', onMessage);
         });
         const method = methodSelect.value;
+        if (method === 'feagin14') {
+            clear2D();
+        }
 
         // Post to worker; transfer the IC buffer (we won't need it again on main)
         simWorker.postMessage({ requestId, ic, t, method }, [ic.buffer]);

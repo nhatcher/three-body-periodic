@@ -184,6 +184,19 @@ function draw2D(paths, times, masses, energy, angularMomentum, period) {
     });
 }
 
+function clear2D() {
+    resizeCanvas();
+    ctx.save();
+    ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+    const humanTime = new Date().toLocaleTimeString();
+    const textContent = `Computing. Started at ${humanTime} (this may take a while)...`;
+    ctx.font = '32px sans-serif';
+    ctx.fillStyle = '#df4e35ff';
+    const textWidth = ctx.measureText(textContent).width;
+    ctx.fillText(textContent, (canvas.clientWidth - textWidth) / 2, canvas.clientHeight / 2);
+    ctx.restore();
+}
+
 
 
 
@@ -215,4 +228,4 @@ function attachCoordEventsOnce() {
 }
 
 
-export { draw2D };
+export { draw2D, clear2D };

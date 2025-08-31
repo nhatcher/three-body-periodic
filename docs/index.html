@@ -6,6 +6,7 @@
   <title>Three-Body Simulation</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="modal.css" />
+  <link rel="stylesheet" href="info.css" />
 </head>
 <body>
 <div class="wrap">
@@ -18,6 +19,8 @@
           <!-- <button id="record" class="primary">Record video</button> -->
           <button id="new-example" class="primary">Edit</button>
           <button class="primary" id="run">Pause</button>
+        </div>
+        <div class="control-div">
           <select id="method">
             <option value="dop853">DOP853 (high accuracy)</option>
             <option value="rk4">RK4 (low accuracy)</option>
@@ -25,17 +28,22 @@
             <!-- <option value="dop853_hp">DOP853 (high precision)</option> -->
             <option value="feagin14">Feagin14 (high precision)</option>
           </select>
+          <button id="method-btn" class="info-btn" data-for="method" aria-label="Explain the selected integrator" aria-controls="info-pop">?</button>
         </div>
       </div>
       <div class="control">
-        <label for="example-class">Example class</label>
+        <div class="control-div">
+          <label for="example-class">Example class</label>
+          <button id="example-class-btn" class="info-btn" data-for="example-class" aria-haspopup="dialog" aria-controls="info-dialog" title="What is this?">?</button>
+       </div>
         <select id="example-class">
-          <option value="free_fall">Free Fall</option>
+          <option value="free_fall">Free Fall (Ling-Liao)</option>
           <option value="equal_mass">Equal Mass</option>
           <option value="unequal_mass">Unequal Mass</option>
           <option value="choreographies">Choreographies</option>
           <option value="3d_examples">Examples 3D</option>
-          <option value="free_fall_large">Free Fall Large</option>
+          <option value="free_fall_puzynin_sd">Free Fall (symmetric Puzynin)</option>
+          <option value="free_fall_puzynin_600">Free Fall (first 600, Puzynin)</option>
           <option value="custom">Custom Examples</option>
           <!-- <option value="bhh_satellites_table_3">BHH Satellites Table 3</option>
           <option value="bhh_satellites_table_4">BHH Satellites Table 4</option> -->
@@ -121,8 +129,106 @@
   </form>
 </dialog>
 
+<dialog id="info-dialog" aria-labelledby="info-title">
+  <form method="dialog" class="modal" id="info-form">
+    <div id="info-header"></div>
+    <div id="info-content"></div>
+    <menu class="modal-actions">
+      <button value="cancel" class="primary">Close</button>
+    </menu>
+  </form>
+</dialog>
+
+<template id="info-header-method">
+  <h2 id="info-title">ODE Integrator</h2>
+  <p>Choose here the numerical integration method used to solve the there body problem (Recommended DOP853)</p>
+  <p>The differential equation is solved in a web-worker</p>
+</template>
+
+<template id="info-header-example-class">
+  <h2 id="info-title">Example Class</h2>
+  <p>You will find here different classes of examples of periodic 3 body orbits</p>
+</template>
+
+<!-- METHOD helps -->
+<template id="help-method-dop853">
+  <h2 id="info-title">DOP853 (8(5,3))</h2>
+  <p>Dormand-Prince method of order 8. Great default for accuracy. Variable step size, small energy drift over very long spans.</p>
+</template>
+
+<template id="help-method-rk4">
+  <h2 id="info-title">RK4</h2>
+  <p>Classic fixed-step 4th order. Simple to code and understand. It generally doesn't perform well in these examples</p>
+</template>
+
+<template id="help-method-verlet">
+  <h2 id="info-title">Velocity Verlet</h2>
+  <p>Symplectic 2nd order—great long-term energy behavior for Hamiltonian systems with a suitably small dt.</p>
+  <p>It is here just as an example</p>
+</template>
+
+<template id="help-method-feagin14">
+  <h2 id="info-title">Feagin 14(12)</h2>
+  <p>Very high-order explicit RK with embedded error. Heavy but superb when you need extreme accuracy/precision.</p>
+  <p>Uses multiple precision arithmetic. Solving an example might take minutes or hours.</p>
+</template>
+
+<!-- EXAMPLE-CLASS helps -->
+<template id="help-example-class-choreographies">
+  <h2 id="info-title">Choreographies</h2>
+  <p>All three bodies share a single closed curve (e.g., figure-eight). Sensitive to tolerances; use adaptive methods.</p>
+</template>
+
+<template id="help-example-class-equal_mass">
+  <h2 id="info-title">Equal Mass</h2>
+  <p>Periodic orbits with equal masses. Initiated by Šuvakov and Dmitrašinović in their paper <a href="" target="_blank" rel="noopener noreferrer">Three Classes of Newtonian Three-Body Planar Periodic Orbits</a>, here we have the list from <a href="https://arxiv.org/abs/1705.00527" target="_blank" rel="noopener noreferrer">More than six hundreds new families of Newtonian periodic planar collisionless three-body orbits
+</a></p>
+  <p>See also their <a href="https://github.com/sjtu-liao/three-body" target="_blank" rel="noopener noreferrer">website</a></p>
+</template>
+
+<template id="help-example-class-unequal_mass">
+  <h2 id="info-title">Unequal Mass</h2>
+  <p>Periodic orbits with unequal masses. Many were found by Li and Liao in their paper <a href="https://arxiv.org/abs/1709.04775" target="_blank" rel="noopener noreferrer">The 1223 new periodic orbits of planar three-body problem with unequal mass and zero angular momentum</a></p>
+  <p>See also their <a href="https://github.com/sjtu-liao/three-body" target="_blank" rel="noopener noreferrer">GitHub repo</a></p>
+</template>
+
+<template id="help-example-class-3d_examples">
+  <h2 id="info-title">Examples 3D</h2>
+  <p>Some periodic orbits in 3D. These are not as well studied as the planar case</p>
+  <p>See for example the paper <a href="https://arxiv.org/abs/2508.08568" target="_blank" rel="noopener noreferrer">Discovery of 10,059 new three-dimensional periodic orbits of general three-body problem</a> by Li and Liao</p>
+</template>
+
+<template id="help-example-class-free_fall">
+  <h2 id="info-title">Free Fall (Ling-Liao)</h2>
+  <p>The 316 periodic orbits discovered by Xiaoming Li and Shijun Liao in their paper <a href="https://arxiv.org/abs/1805.07980" target="_blank" rel="noopener noreferrer">Collisionless periodic orbits in the free-fall three-body problem</a></p>
+  <p>These are 2D solutions with no initial speed. See also their <a href="https://github.com/sjtu-liao/three-body" target="_blank" rel="noopener noreferrer">GitHub repo</a></p>
+</template>
+
+<template id="help-example-class-free_fall_puzynin_sd">
+  <h2 id="info-title">Free Fall</h2>
+  <p>These solutions were found by I. Hristov, R. Hristova, T. Puzynina, Z. Sharipov and Z. Tukhliev in their paper <a href="https://arxiv.org/abs/2503.00432">Numerical search for three-body periodic free-fall orbits with central symmetry</a></p>
+  <p>I call it the Puzynin solutions, in honour of their teacher <a href="https://www.jinr.ru/posts/igor-victorovich-puzynin-condolences/" target="_blank" rel="noopener noreferrer">Igor Viktorovich Puzynin</a></p>
+  <p>These are 2D solutions with no initial speed. I have included here only the so called <it>self-dual symmetric solutions</it></p>
+  <p>See also their website <a href="https://db2.fmi.uni-sofia.bg/3bodyfree/" target="_blank" rel="noopener noreferrer">https://db2.fmi.uni-sofia.bg/3bodyfree/</a></p>
+  <p>Some of this orbits require a multiple precision method for their solution</p>
+</template>
+
+<template id="help-example-class-free_fall_puzynin_600">
+  <h2 id="info-title">Free Fall</h2>
+  <p>These solutions were found by I. Hristov, R. Hristova, T. Puzynina, Z. Sharipov and Z. Tukhliev in their paper <a href="https://arxiv.org/abs/2503.00432">Numerical search for three-body periodic free-fall orbits with central symmetry</a></p>
+  <p>I call it the Puzynin solutions, in honour of their teacher <a href="https://www.jinr.ru/posts/igor-victorovich-puzynin-condolences/" target="_blank" rel="noopener noreferrer">Igor Viktorovich Puzynin</a></p>
+  <p>These are 2D solutions with no initial speed. I have included here the first 600 solutions</p>
+  <p>See also their website <a href="https://db2.fmi.uni-sofia.bg/3bodyfree/" target="_blank" rel="noopener noreferrer">https://db2.fmi.uni-sofia.bg/3bodyfree/</a></p>
+  <p>Some of this orbits require a multiple precision method for their solution</p>
+</template>
+
+<template id="help-example-class-custom">
+  <h2 id="info-title">Custom examples</h2>
+  <p>Yo can create those examples by clicking edit.</p>
+</template>
 
 <script type="module" src="script.js"></script>
 <script type="module" src="modal.js"></script>
+<script type="module" src="info.js"></script>
 </body>
 </html>

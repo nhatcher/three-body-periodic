@@ -4,7 +4,8 @@ import choreographies from './examples/choreographies.js';
 import free_fall from './examples/free_fall.js';
 import examples3d from './examples/3d_examples.js';
 import custom_examples from './examples/custom.js';
-import free_fall_large from './examples/free_fall_large.js';
+import free_fall_puzynin_sd from './examples/free_fall_puzynin_sd.js';
+import free_fall_puzynin_600 from './examples/free_fall_puzynin_600.js';
 
 const exampleClassDropdown = document.getElementById('example-class');
 const exampleSelect = document.getElementById('example');
@@ -32,9 +33,14 @@ async function readIC2D() {
         case 'custom':
             values = await custom_examples.getOrbit(example);
             break;
-        case 'free_fall_large':
-            values = await free_fall_large.getOrbit(example);
+        case 'free_fall_puzynin_sd':
+            values = await free_fall_puzynin_sd.getOrbit(example);
             break;
+        case 'free_fall_puzynin_600':
+            values = await free_fall_puzynin_600.getOrbit(example);
+            break;
+        default:
+            throw new Error(`Unknown example class: ${exampleClass}`);
     }
     return values;
 }
@@ -65,8 +71,11 @@ async function fill_example_dropdown() {
         case '3d_examples':
             examples = await examples3d.getNames();
             break;
-        case 'free_fall_large':
-            examples = await free_fall_large.getNames();
+        case 'free_fall_puzynin_sd':
+            examples = await free_fall_puzynin_sd.getNames();
+            break;
+        case 'free_fall_puzynin_600':
+            examples = await free_fall_puzynin_600.getNames();
             break;
         case 'custom':
             examples = custom_examples.getNames();

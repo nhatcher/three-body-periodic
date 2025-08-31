@@ -40,12 +40,16 @@ header {
   flex-direction: column;
   gap: 6px;
 }
+.control-div {
+  display: flex;
+}
 .hidden {
   display: none;
 }
 label {
   color: var(--muted);
   font-size: 12px;
+  margin: auto 0px;
 }
 input,
 select,
