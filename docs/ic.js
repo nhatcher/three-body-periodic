@@ -7,6 +7,8 @@ import custom_examples from './examples/custom.js';
 import free_fall_puzynin_sd from './examples/free_fall_puzynin_sd.js';
 import free_fall_puzynin_600 from './examples/free_fall_puzynin_600.js';
 import bhh_satellites from './examples/bhh_satellites.js';
+import broucke_boggs from './examples/broucke_boggs.js';
+import matt_sheen from './examples/matt_sheen.js';
 
 const exampleClassDropdown = document.getElementById('example-class');
 const exampleSelect = document.getElementById('example');
@@ -42,6 +44,12 @@ async function readIC2D() {
             break;
         case 'bhh_satellites':
             values = bhh_satellites.getOrbit(example);
+            break;
+        case 'broucke_boggs':
+            values = broucke_boggs.getOrbit(example);
+            break;
+        case 'matt_sheen':
+            values = matt_sheen.getOrbit(example);
             break;
         default:
             throw new Error(`Unknown example class: ${exampleClass}`);
@@ -83,6 +91,12 @@ async function fill_example_dropdown() {
             break;
         case 'bhh_satellites':
             examples = bhh_satellites.getNames();
+            break;
+        case 'broucke_boggs':
+            examples = broucke_boggs.getNames();
+            break;
+        case 'matt_sheen':
+            examples = matt_sheen.getNames();
             break;
         case 'custom':
             examples = custom_examples.getNames();

@@ -8,13 +8,13 @@ import { reshapeResultToPaths } from './util.js';
 const simWorker = new Worker(new URL('./sim-worker.js', import.meta.url), { type: 'module' });
 
 let workerReady = new Promise((resolve) => {
-  const onMsg = (evt) => {
-    if (evt.data?.type === 'ready') {
-      simWorker.removeEventListener('message', onMsg);
-      resolve();
-    }
-  };
-  simWorker.addEventListener('message', onMsg);
+    const onMsg = (evt) => {
+        if (evt.data?.type === 'ready') {
+            simWorker.removeEventListener('message', onMsg);
+            resolve();
+        }
+    };
+    simWorker.addEventListener('message', onMsg);
 });
 
 await workerReady;
@@ -44,16 +44,18 @@ let latestRequestId = 0;
 
 
 function play_loop() {
-    const sliderValue = parseFloat(timeSlider.value);
-    const maxTime = parseFloat(timeSlider.max);
-    if (sliderValue >= maxTime) {
-        timeSlider.value = '0';
-    } else {
-        timeSlider.value = (sliderValue + 1).toString();
-    }
-    draw();
     if (runButton.innerText === 'Pause') {
+        const sliderValue = parseFloat(timeSlider.value);
+        const maxTime = parseFloat(timeSlider.max);
+        if (sliderValue >= maxTime) {
+            timeSlider.value = '0';
+        } else {
+            timeSlider.value = (sliderValue + 1).toString();
+        }
+        draw();
         requestAnimationFrame(play_loop);
+    } else {
+        draw();
     }
 }
 
@@ -174,6 +176,29 @@ function updateUrl() {
     // We don’t want to clutter history (otherwise we could use pushState)
     window.history.replaceState({}, "", newUrl);
 }
+
+document.getElementById('canvasWrap').addEventListener('keydown', (evt) => {
+    switch (evt.key) {
+        case 'ArrowLeft':
+            // choose the previous example in dropdown
+            exampleSelect.selectedIndex = (exampleSelect.selectedIndex - 1 + exampleSelect.options.length) % exampleSelect.options.length;
+            exampleSelect.dispatchEvent(new Event('change'));
+            evt.preventDefault();
+            break;
+        case 'ArrowRight':
+            // choose the next example in dropdown
+            exampleSelect.selectedIndex = (exampleSelect.selectedIndex + 1) % exampleSelect.options.length;
+            exampleSelect.dispatchEvent(new Event('change'));
+            evt.preventDefault();
+            break;
+        case ' ':
+            runButton.click();
+            evt.preventDefault();
+            break;
+            default:
+            break;
+    }
+});
 
 
 // const recordBtn = document.getElementById('record');
