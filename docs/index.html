@@ -49,10 +49,12 @@
           <option value="broucke_boggs">Broucke Boggs</option>
           <option value="matt_sheen">Matt Sheen</option>
         </select>
-        <label for="example">Select example</label>
-        <select id="example">
-          
-        </select>
+        <div class="control-div">
+          <label for="example">Select example</label>
+          <button id="example-btn" class="info-btn" data-for="example" aria-haspopup="dialog" aria-controls="info-dialog" title="What is this?">?</button>
+        </div>
+        <select id="example"></select>
+        
       </div>
     </div>
   </header>
@@ -116,8 +118,9 @@
       <input inputmode="decimal" required id="modal-vy3" placeholder="-0.1"/>
       <input inputmode="decimal" required id="modal-vz3" placeholder="0.0" />
 
-      <div class="row-label">Period</div>
-      <input inputmode="decimal" required id="modal-period"  placeholder="1"   />
+      <div class="row-label">Period/Angle</div>
+      <input inputmode="decimal" required id="modal-period" placeholder="1" />
+      <input inputmode="decimal" required id="modal-angle" placeholder="1" />
     </div>
     
 
@@ -131,7 +134,6 @@
 
 <dialog id="info-dialog" aria-labelledby="info-title">
   <form method="dialog" class="modal" id="info-form">
-    <div id="info-header"></div>
     <div id="info-content"></div>
     <menu class="modal-actions">
       <button value="cancel" class="primary">Close</button>
@@ -174,37 +176,37 @@
 </template>
 
 <!-- EXAMPLE-CLASS helps -->
-<template id="help-example-class-choreographies">
+<template id="help-example-choreographies">
   <h2 id="info-title">Choreographies</h2>
   <p>All three bodies share a single closed curve (e.g., figure-eight). Sensitive to tolerances; use adaptive methods.</p>
 </template>
 
-<template id="help-example-class-equal_mass">
+<template id="help-example-equal_mass">
   <h2 id="info-title">Equal Mass</h2>
   <p>Periodic orbits with equal masses. Initiated by Šuvakov and Dmitrašinović in their paper <a href="" target="_blank" rel="noopener noreferrer">Three Classes of Newtonian Three-Body Planar Periodic Orbits</a>, here we have the list from <a href="https://arxiv.org/abs/1705.00527" target="_blank" rel="noopener noreferrer">More than six hundreds new families of Newtonian periodic planar collisionless three-body orbits
 </a></p>
   <p>See also their <a href="https://github.com/sjtu-liao/three-body" target="_blank" rel="noopener noreferrer">website</a></p>
 </template>
 
-<template id="help-example-class-unequal_mass">
+<template id="help-example-unequal_mass">
   <h2 id="info-title">Unequal Mass</h2>
   <p>Periodic orbits with unequal masses. Many were found by Li and Liao in their paper <a href="https://arxiv.org/abs/1709.04775" target="_blank" rel="noopener noreferrer">The 1223 new periodic orbits of planar three-body problem with unequal mass and zero angular momentum</a></p>
   <p>See also their <a href="https://github.com/sjtu-liao/three-body" target="_blank" rel="noopener noreferrer">GitHub repo</a></p>
 </template>
 
-<template id="help-example-class-3d_examples">
+<template id="help-example-3d_examples">
   <h2 id="info-title">Examples 3D</h2>
   <p>Some periodic orbits in 3D. These are not as well studied as the planar case</p>
   <p>See for example the paper <a href="https://arxiv.org/abs/2508.08568" target="_blank" rel="noopener noreferrer">Discovery of 10,059 new three-dimensional periodic orbits of general three-body problem</a> by Li and Liao</p>
 </template>
 
-<template id="help-example-class-free_fall">
+<template id="help-example-free_fall">
   <h2 id="info-title">Free Fall (Ling-Liao)</h2>
   <p>The 316 periodic orbits discovered by Xiaoming Li and Shijun Liao in their paper <a href="https://arxiv.org/abs/1805.07980" target="_blank" rel="noopener noreferrer">Collisionless periodic orbits in the free-fall three-body problem</a></p>
   <p>These are 2D solutions with no initial speed. See also their <a href="https://github.com/sjtu-liao/three-body" target="_blank" rel="noopener noreferrer">GitHub repo</a></p>
 </template>
 
-<template id="help-example-class-free_fall_puzynin_sd">
+<template id="help-example-free_fall_puzynin_sd">
   <h2 id="info-title">Free Fall</h2>
   <p>These solutions were found by I. Hristov, R. Hristova, T. Puzynina, Z. Sharipov and Z. Tukhliev in their paper <a href="https://arxiv.org/abs/2503.00432">Numerical search for three-body periodic free-fall orbits with central symmetry</a></p>
   <p>I call it the Puzynin solutions, in honour of their teacher <a href="https://www.jinr.ru/posts/igor-victorovich-puzynin-condolences/" target="_blank" rel="noopener noreferrer">Igor Viktorovich Puzynin</a></p>
@@ -213,7 +215,7 @@
   <p>Some of this orbits require a multiple precision method for their solution</p>
 </template>
 
-<template id="help-example-class-free_fall_puzynin_600">
+<template id="help-example-free_fall_puzynin_600">
   <h2 id="info-title">Free Fall</h2>
   <p>These solutions were found by I. Hristov, R. Hristova, T. Puzynina, Z. Sharipov and Z. Tukhliev in their paper <a href="https://arxiv.org/abs/2503.00432">Numerical search for three-body periodic free-fall orbits with central symmetry</a></p>
   <p>I call it the Puzynin solutions, in honour of their teacher <a href="https://www.jinr.ru/posts/igor-victorovich-puzynin-condolences/" target="_blank" rel="noopener noreferrer">Igor Viktorovich Puzynin</a></p>
@@ -222,13 +224,13 @@
   <p>Some of this orbits require a multiple precision method for their solution</p>
 </template>
 
-<template id="help-example-class-bhh_satellites">
+<template id="help-example-bhh_satellites">
   <h2 id="info-title">BBH Satellites</h2>
   <p>These are not periodic orbits, this are periodic in a rotating frame of reference</p>
 </template>
 
 
-<template id="help-example-class-custom">
+<template id="help-example-custom">
   <h2 id="info-title">Custom examples</h2>
   <p>You can create those examples by clicking edit.</p>
 </template>

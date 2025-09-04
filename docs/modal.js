@@ -11,7 +11,7 @@ const exampleClassDropdown = document.getElementById('example-class');
 
 
 function fillInputsFromIC(data) {
-  const [ic, t] = data;
+  const [ic, t, theta_max] = data;
   if (ic.length !== 21) {
     throw new Error("Expected 21 values (3 bodies × 7 values each)");
   }
@@ -20,7 +20,7 @@ function fillInputsFromIC(data) {
     const base = i * 7;
     const [x, y, z, vx, vy, vz, m] = ic.slice(base, base + 7);
 
-    const idx = i + 1; // body1, body2, body3
+    const idx = i + 1;
 
     document.getElementById(`modal-x${idx}`).value = x;
     document.getElementById(`modal-y${idx}`).value = y;
@@ -31,6 +31,7 @@ function fillInputsFromIC(data) {
     document.getElementById(`modal-m${idx}`).value = m;
   }
   document.getElementById('modal-period').value = t;
+  document.getElementById('modal-angle').value = theta_max || 0;
 }
 
 deleteBtn.addEventListener('click', async () => {
@@ -83,7 +84,7 @@ function collectICs() {
       num('x1'), num('y1'), num('z1'), num('vx1'), num('vy1'), num('vz1'), num('m1'),
       num('x2'), num('y2'), num('z2'), num('vx2'), num('vy2'), num('vz2'), num('m2'),
       num('x3'), num('y3'), num('z3'), num('vx3'), num('vy3'), num('vz3'), num('m3'),
-  ], num('period')];
+  ], num('period'), num('angle')];
 
   return { name, bodies };
 }
