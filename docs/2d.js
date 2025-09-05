@@ -118,7 +118,7 @@ function drawAxis() {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     for (let xVal = Math.ceil(minX / xStep) * xStep; xVal < maxX; xVal += xStep) {
-        const [tx, _] = toCanvas(xVal, minY); // map to canvas X pos
+        const [tx, _] = toCanvas(xVal, minY);
         ctx.beginPath();
         ctx.moveTo(tx, xAxisY);
         ctx.lineTo(tx, xAxisY - tick);
@@ -131,7 +131,7 @@ function drawAxis() {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     for (let yVal = Math.ceil(minY / yStep) * yStep; yVal < maxY; yVal += yStep) {
-        const [_, ty] = toCanvas(minX, yVal); // map to canvas Y pos
+        const [_, ty] = toCanvas(minX, yVal);
         ctx.beginPath();
         ctx.moveTo(yAxisX, ty);
         ctx.lineTo(yAxisX + tick, ty);

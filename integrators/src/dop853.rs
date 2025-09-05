@@ -6,11 +6,6 @@
 
 use crate::{types::Body, utils::accelerations};
 
-#[inline]
-fn clamp(x: f64, lo: f64, hi: f64) -> f64 {
-    x.max(lo).min(hi)
-}
-
 // ---------- DOP853 Butcher data ----------
 // Sources for these constants (same values):
 // - SciPy devdocs arrays DOP853.A / .B / .C (method definition)
@@ -270,6 +265,16 @@ fn dop853_trial(
     (y8, errn, k[0].clone())
 }
 
+fn push_sample(result: &mut Vec<f64>, y: &[f64], t: f64, n: usize) {
+    for i in 0..n {
+        let o = 6 * i;
+        result.push(y[o]);
+        result.push(y[o + 1]);
+        result.push(y[o + 2]);
+    }
+    result.push(t);
+}
+
 /// Evolve from t=0 to t=t_end with adaptive DOP853.
 /// Returns (flat positions history, final time reached).
 ///
@@ -281,84 +286,63 @@ pub fn evolve(bodies: &mut [Body], t_end: f64) -> (Vec<f64>, f64) {
     let n = bodies.len();
     let masses: Vec<f64> = bodies.iter().map(|b| b.m).collect();
 
-    // tolerances & controller params (conservative defaults for chaotic 3-body)
     const RTOL: f64 = 1e-9;
     const ATOL: f64 = 1e-12;
     const SAFETY: f64 = 0.9;
     const FAC_MIN: f64 = 0.2;
     const FAC_MAX: f64 = 5.0;
-    const P: f64 = 8.0; // order
-    const INV_EXP: f64 = 1.0 / (P + 1.0); // 1/9
 
-    let eps2 = 0.0; //1e-8; // Plummer softening^2 (set 0.0 to disable)
+    const P: f64 = 8.0; // order
+    const INV_EXP: f64 = 1.0 / (P + 1.0);
+
+    let eps2 = 0.0;
 
     let mut y = pack_state(bodies);
     let mut t = 0.0;
-
-    // naive initial step guess: fraction of interval, bounded away from zero
-    let mut h = (t_end - t).abs().max(1e-12) * 1e-3;
-    h = h.min((t_end - t).abs()); // can't jump past end
-    // direction
-    let dir = if t_end >= 0.0 { 1.0 } else { -1.0 };
-    h *= dir;
+    let dir = (t_end - t).signum();
 
     let mut result = Vec::<f64>::new();
-    let mut last_fs = None::<Vec<f64>>; // could be used for FSAL reuse (not needed here)
+    push_sample(&mut result, &y, t, n);
+
+    // Initial step (adaptive)
+    let mut h = (t_end - t).abs().max(1e-12) * 1e-3 * dir;
 
     let max_steps = 5_000_000usize;
     let mut steps = 0usize;
 
-    while (t - t_end).abs() > 0.0 && steps < max_steps {
-        // push current positions (like your RK4/Verlet do)
-        for i in 0..n {
-            let o = 6 * i;
-            result.push(y[o]);
-            result.push(y[o + 1]);
-            result.push(y[o + 2]);
-        }
-        result.push(t);
-
-        // clamp final step to hit t_end
-        if (t - t_end).abs() < (h.abs() * 0.5) || (t - t_end).signum() == dir {
+    while (t_end - t) * dir > 0.0 && steps < max_steps {
+        // Don’t overshoot t_end
+        if (t + h - t_end) * dir > 0.0 {
             h = t_end - t;
         }
 
         let (y_trial, errn, _k1) = dop853_trial(&y, h, &masses, eps2, RTOL, ATOL);
 
-        if errn <= 1.0 || ((t - t_end) * dir) >= 0.0 {
+        if errn <= 1.0 {
             // accept
             y = y_trial;
             t += h;
+            push_sample(&mut result, &y, t, n);
+
             // next h
             let fac = if errn == 0.0 {
                 FAC_MAX
             } else {
-                SAFETY * errn.powf(-INV_EXP)
+                (SAFETY * errn.powf(-INV_EXP)).clamp(FAC_MIN, FAC_MAX)
             };
-            h *= clamp(fac, FAC_MIN, FAC_MAX);
+            h *= fac;
         } else {
-            // reject and shrink
-            let fac = SAFETY * errn.powf(-INV_EXP);
-            h *= clamp(fac, 0.1, 0.5); // shrink a bit more aggressively on reject
-            continue; // retry from same t,y
+            // reject -> shrink
+            let fac = (SAFETY * errn.powf(-INV_EXP)).clamp(0.1, 0.5);
+            h *= fac;
         }
 
         steps += 1;
         if h.abs() < 1e-16 {
-            // give up to avoid infinite loop in extreme cases
             break;
-            // h = t_end - t;
-        }
-        if (t_end - t).abs() <= 0.0 {
-            break;
-        }
-        // ensure we don't overshoot (only clamp if stepping past t_end)
-        if ((t - t_end) * dir) > 0.0 {
-            h = t_end - t;
         }
     }
 
-    // write back to bodies the final state
     unpack_state(&y, bodies);
     (result, t)
 }

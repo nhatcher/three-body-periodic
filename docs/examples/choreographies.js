@@ -411,26 +411,26 @@ function getNames() {
 
 function getOrbit(index) {
     // c1, c2, c3, c4 and c5.
-    // x1=−2c1
-    // x2=c1
-    // x3=c1
-    // y1=0
-    // y2=c2
-    // y3=−c2
-    // u1=0
-    // u2=c3
-    // u3=−c3
-    // v1=−2c4
-    // v2=c4
-    // v3=c4
-    // m1=m2=m3=1/3
-    // T=c5*3
-    const orbit = data[index];
+    // x1 = −2c1
+    // x2 = c1
+    // x3 = c1
+    // y1 = 0
+    // y2 = c2
+    // y3 = −c2
+    // u1 = 0
+    // u2 = c3
+    // u3 = −c3
+    // v1 = −2c4
+    // v2 = c4
+    // v3 = c4
+    // m1 = m2 = m3 = 1/3
+    // T = c5 * 3
+    const [c1, c2, c3, c4, c5] = data[index];
     return [
-        [-2 * orbit[0], 0, 0, 0, -2 * orbit[3], 0, 1 / 3,
-         orbit[0], orbit[1], 0, orbit[2], orbit[3], 0, 1 / 3,
-         orbit[0], -orbit[1], 0, -orbit[2], orbit[3], 0, 1 / 3],
-        orbit[4], 0
+        [-2 * c1, 0, 0, 0, -2 * c4, 0, 1 / 3,
+         c1, c2, 0, c3, c4, 0, 1 / 3,
+         c1, -c2, 0, -c3, c4, 0, 1 / 3],
+        c5, 0
     ];
 }
 
@@ -438,8 +438,11 @@ function getName() {
     return "Choreographies";
 }
 
-function getDescription() {
-    return "Famous periodic three-body orbits where all bodies share the same path.";
+function getDescriptionHTML() {
+    return `
+<h2 id="info-title">Choreographies</h2>
+<p>All three bodies share a single closed curve (e.g., figure-eight). Sensitive to tolerances; use adaptive methods.</p>
+`.trim();
 }
 
 function getLinks() {
@@ -448,7 +451,7 @@ function getLinks() {
 
 export default {
     getName,
-    getDescription,
+    getDescriptionHTML,
     getLinks,
     getNames,
     getOrbit
