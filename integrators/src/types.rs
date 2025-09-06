@@ -4,4 +4,3 @@ pub struct Body {
     pub r: [f64; 3],
     pub v: [f64; 3],
 }
-

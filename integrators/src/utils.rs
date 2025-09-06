@@ -54,7 +54,6 @@ pub fn smul(s: f64, a: [f64; 3]) -> [f64; 3] {
     [s * a[0], s * a[1], s * a[2]]
 }
 
-
 /// Compute accelerations a_i = Σ_{j≠i} m_j r_ij / |r_ij|^3  (G = 1)
 /// Optional Plummer softening via eps2 to avoid singularities in close encounters.
 pub fn accelerations(positions: &[[f64; 3]], masses: &[f64], eps2: f64) -> Vec<[f64; 3]> {

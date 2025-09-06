@@ -201,6 +201,14 @@ fn render_png(
             chart.draw_series(std::iter::once(Circle::new(
                 (x0, y0),
                 /*radius px*/ 4,
+                ShapeStyle::from(&colors[i]).stroke_width(2),
+            )))?;
+        }
+        // end: OPEN circle (no fill)
+        if let Some(&(xn, yn)) = poly.last() {
+            chart.draw_series(std::iter::once(Circle::new(
+                (xn, yn),
+                5,
                 colors[i].filled(),
             )))?;
         }

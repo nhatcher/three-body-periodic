@@ -68,6 +68,7 @@ async function run() {
     try {
         // Read the initial conditions and compute the orbit parameters
         const [icRaw, t, theta_max] = await readIC2D();
+        console.log(icRaw, t, theta_max);
         masses = [icRaw[6], icRaw[13], icRaw[20]];
         period = t;
         𝜃_max = theta_max || 0;

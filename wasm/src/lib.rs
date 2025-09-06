@@ -29,7 +29,6 @@ pub fn evolve(data: &[f64], t: f64, method: &str) -> Result<Vec<f64>, String> {
         "rk4" => evolve_rk4(&mut bodies, t),
         "verlet" => evolve_verlet(&mut bodies, t),
         "dop853" => evolve_dop853(&mut bodies, t),
-        "dop853_hp" => three_body::evolve_dop853_hp(&mut bodies, t),
         "feagin14" => three_body::evolve_feagin14(&mut bodies, t),
         _ => return Err(format!("Unknown method: {}", method)),
     };

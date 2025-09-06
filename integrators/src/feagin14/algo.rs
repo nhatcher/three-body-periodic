@@ -1,5 +1,5 @@
 use bigdecimal::BigDecimal as BD;
-use bigdecimal::num_traits::{FromPrimitive, One, Signed, ToPrimitive, Zero};
+use bigdecimal::num_traits::{FromPrimitive, One, ToPrimitive, Zero};
 use once_cell::sync::Lazy;
 use std::str::FromStr;
 
@@ -22,10 +22,8 @@ static B_BD: Lazy<Vec<Vec<BD>>> = Lazy::new(|| {
         .collect()
 });
 
-// Error estimator indices (1/1000) * h * (k[1] - k[33])  [1-based in file]
 const ERR_I1: usize = 1;
 const ERR_I2: usize = 33;
-const ERR_SCALE_F64: f64 = 1.0 / 1000.0;
 static ERR_SCALE: Lazy<BD> = Lazy::new(|| bd("0.001"));
 
 // Working scale for BigDecimal (digits after decimal). Tune as you like.
@@ -76,10 +74,10 @@ fn saxpy_into_bd(out: &mut [BD], a: &BD, x: &[BD]) {
     }
 }
 
-
 // Weighted RMS error norm (returns f64 for the step controller)
 fn error_norm_bd(err: &[BD], y: &[BD], y_new: &[BD], rtol: f64, atol: f64) -> f64 {
-    let mut accum = BD::zero();
+    // let mut accum = BD::zero();
+    let mut accum = 0.0;
     let n = err.len();
     for i in 0..n {
         let yi = y[i].to_f64().unwrap().abs();
@@ -89,9 +87,9 @@ fn error_norm_bd(err: &[BD], y: &[BD], y_new: &[BD], rtol: f64, atol: f64) -> f6
             continue;
         }
         let e = err[i].to_f64().unwrap() / sc;
-        accum = with_scale(accum + BD::from_f64(e * e).unwrap());
+        accum += e * e;
     }
-    let mean = accum.to_f64().unwrap() / (n as f64);
+    let mean = accum / (n as f64);
     mean.sqrt()
 }
 
@@ -152,13 +150,7 @@ fn deriv_bd(y: &[BD], masses: &[BD]) -> Vec<BD> {
 }
 
 // ---------- One trial step (BigDecimal everything) ----------
-fn erk_trial_bd(
-    y: &[BD],
-    h: f64,
-    masses: &[BD],
-    rtol: f64,
-    atol: f64,
-) -> (Vec<BD>, f64) {
+fn erk_trial_bd(y: &[BD], h: f64, masses: &[BD], rtol: f64, atol: f64) -> (Vec<BD>, f64) {
     let n = y.len();
     let s = B_BD.len(); // 35
     let mut k: Vec<Vec<BD>> = (0..s).map(|_| vec![BD::zero(); n]).collect();
@@ -173,7 +165,6 @@ fn erk_trial_bd(
         let mut ytmp = y.to_vec();
         for (j, aij) in B_BD[i].iter().enumerate() {
             if !aij.is_zero() {
-                // let coeff = with_scale(h_bd.clone() * aij.clone());
                 let coeff = &h_bd * aij;
                 saxpy_into_bd(&mut ytmp, &coeff, &k[j]);
             }
@@ -186,7 +177,6 @@ fn erk_trial_bd(
     for i in 0..s {
         let bi = &C_BD[i];
         if !bi.is_zero() {
-            // let coeff = with_scale(h_bd.clone() * bi.clone());
             let coeff = &h_bd * bi;
             saxpy_into_bd(&mut y_hi, &coeff, &k[i]);
         }
@@ -195,9 +185,7 @@ fn erk_trial_bd(
     // error vector via stage-difference
     let mut errv = vec![BD::zero(); n];
     for (m, err) in errv.iter_mut().enumerate() {
-        *err = with_scale(
-            ERR_SCALE.clone() * (&h_bd * (&k[ERR_I1][m] - &k[ERR_I2][m])),
-        );
+        *err = with_scale(ERR_SCALE.clone() * (&h_bd * (&k[ERR_I1][m] - &k[ERR_I2][m])));
     }
 
     let errn = error_norm_bd(&errv, y, &y_hi, rtol, atol);
@@ -220,8 +208,8 @@ pub fn evolve(bodies: &mut [Body], t_end: f64) -> (Vec<f64>, f64) {
     let masses_bd: Vec<BD> = bodies.iter().map(|b| BD::from_f64(b.m).unwrap()).collect();
 
     // tolerances & controller
-    const RTOL: f64 = 1e-15;
-    const ATOL: f64 = 1e-15;
+    const RTOL: f64 = 1e-18;
+    const ATOL: f64 = 1e-18;
     const SAFETY: f64 = 0.9;
     const FAC_MIN: f64 = 0.2;
     const FAC_MAX: f64 = 5.0;
@@ -268,7 +256,7 @@ pub fn evolve(bodies: &mut [Body], t_end: f64) -> (Vec<f64>, f64) {
         }
 
         steps += 1;
-        if h.abs() < 1e-18 {
+        if h.abs() < 1e-22 {
             break;
         }
     }

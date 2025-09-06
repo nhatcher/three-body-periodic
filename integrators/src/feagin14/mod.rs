@@ -1,3 +1,3 @@
-mod coef;
 mod algo;
+mod coef;
 pub use algo::evolve;
