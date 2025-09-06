@@ -71,31 +71,11 @@ fn with_scale(x: BD) -> BD {
 #[inline]
 fn saxpy_into_bd(out: &mut [BD], a: &BD, x: &[BD]) {
     for (o, xi) in out.iter_mut().zip(x.iter()) {
-        *o = with_scale(o.clone() + with_scale(a.clone() * xi.clone()));
+        let tmp = a * xi;
+        *o += tmp;
     }
 }
 
-// Newton sqrt with fixed scale
-fn sqrt_bd(x: &BD) -> BD {
-    // assert!(x.sign() != bigdecimal::num_traits::sign::Sign::Minus, "sqrt of negative");
-    if x.is_zero() {
-        return BD::zero();
-    }
-    // Start from f64 sqrt for speed
-    let mut y = BD::from_f64(x.to_f64().unwrap().sqrt())
-        .unwrap()
-        .with_scale(BD_SCALE);
-    let two = BD::from(2u32);
-    // iterate
-    for _ in 0..(BD_SCALE as usize + 10) {
-        let y_next = with_scale((y.clone() + with_scale(x.clone() / y.clone())) / two.clone());
-        if with_scale((y_next.clone() - y.clone()).abs()) <= bd(&format!("1e-{}", BD_SCALE)) {
-            return y_next;
-        }
-        y = y_next;
-    }
-    y
-}
 
 // Weighted RMS error norm (returns f64 for the step controller)
 fn error_norm_bd(err: &[BD], y: &[BD], y_new: &[BD], rtol: f64, atol: f64) -> f64 {
@@ -116,7 +96,7 @@ fn error_norm_bd(err: &[BD], y: &[BD], y_new: &[BD], rtol: f64, atol: f64) -> f6
 }
 
 // ---------- BigDecimal N-body derivative ----------
-fn deriv_bd(y: &[BD], masses: &[BD], eps2: &BD) -> Vec<BD> {
+fn deriv_bd(y: &[BD], masses: &[BD]) -> Vec<BD> {
     let n = masses.len();
     let mut r = vec![[BD::zero(), BD::zero(), BD::zero()]; n];
     let mut v = vec![[BD::zero(), BD::zero(), BD::zero()]; n];
@@ -137,28 +117,23 @@ fn deriv_bd(y: &[BD], masses: &[BD], eps2: &BD) -> Vec<BD> {
             if i == j {
                 continue;
             }
-            let dx = with_scale(r[j][0].clone() - r[i][0].clone());
-            let dy = with_scale(r[j][1].clone() - r[i][1].clone());
-            let dz = with_scale(r[j][2].clone() - r[i][2].clone());
-            let r2 = with_scale(
-                with_scale(dx.clone() * dx.clone())
-                    + with_scale(dy.clone() * dy.clone())
-                    + with_scale(dz.clone() * dz.clone())
-                    + eps2.clone(),
-            );
+            let dx = with_scale(&r[j][0] - &r[i][0]);
+            let dy = with_scale(&r[j][1] - &r[i][1]);
+            let dz = with_scale(&r[j][2] - &r[i][2]);
+            let r2 = with_scale(&dx * &dx + &dy * &dy + &dz * &dz);
             if r2.is_zero() {
                 continue;
             }
-            let r = sqrt_bd(&r2);
-            let r3 = with_scale(r.clone() * r2.clone());
+            let r = r2.sqrt().unwrap();
+            let r3 = &r * r2;
             if r3.is_zero() {
                 continue;
             }
-            let inv_r3 = with_scale(BD::one() / r3);
-            let s = with_scale(masses[j].clone() * inv_r3);
-            a[i][0] = with_scale(a[i][0].clone() + with_scale(s.clone() * dx));
-            a[i][1] = with_scale(a[i][1].clone() + with_scale(s.clone() * dy));
-            a[i][2] = with_scale(a[i][2].clone() + with_scale(s.clone() * dz));
+            let inv_r3 = BD::one() / r3;
+            let s = &masses[j] * inv_r3;
+            a[i][0] = with_scale(&a[i][0] + &s * dx);
+            a[i][1] = with_scale(&a[i][1] + &s * dy);
+            a[i][2] = with_scale(&a[i][2] + &s * dz);
         }
     }
 
@@ -181,7 +156,6 @@ fn erk_trial_bd(
     y: &[BD],
     h: f64,
     masses: &[BD],
-    eps2: &BD,
     rtol: f64,
     atol: f64,
 ) -> (Vec<BD>, f64) {
@@ -190,7 +164,7 @@ fn erk_trial_bd(
     let mut k: Vec<Vec<BD>> = (0..s).map(|_| vec![BD::zero(); n]).collect();
 
     // k0
-    k[0] = deriv_bd(y, masses, eps2);
+    k[0] = deriv_bd(y, masses);
 
     let h_bd = BD::from_f64(h).unwrap();
 
@@ -199,11 +173,12 @@ fn erk_trial_bd(
         let mut ytmp = y.to_vec();
         for (j, aij) in B_BD[i].iter().enumerate() {
             if !aij.is_zero() {
-                let coeff = with_scale(h_bd.clone() * aij.clone());
+                // let coeff = with_scale(h_bd.clone() * aij.clone());
+                let coeff = &h_bd * aij;
                 saxpy_into_bd(&mut ytmp, &coeff, &k[j]);
             }
         }
-        k[i] = deriv_bd(&ytmp, masses, eps2);
+        k[i] = deriv_bd(&ytmp, masses);
     }
 
     // high-order solution
@@ -211,24 +186,32 @@ fn erk_trial_bd(
     for i in 0..s {
         let bi = &C_BD[i];
         if !bi.is_zero() {
-            let coeff = with_scale(h_bd.clone() * bi.clone());
+            // let coeff = with_scale(h_bd.clone() * bi.clone());
+            let coeff = &h_bd * bi;
             saxpy_into_bd(&mut y_hi, &coeff, &k[i]);
         }
     }
 
     // error vector via stage-difference
     let mut errv = vec![BD::zero(); n];
-    for m in 0..n {
-        errv[m] = with_scale(
-            ERR_SCALE.clone()
-                * with_scale(
-                    h_bd.clone() * with_scale(k[ERR_I1][m].clone() - k[ERR_I2][m].clone()),
-                ),
+    for (m, err) in errv.iter_mut().enumerate() {
+        *err = with_scale(
+            ERR_SCALE.clone() * (&h_bd * (&k[ERR_I1][m] - &k[ERR_I2][m])),
         );
     }
 
     let errn = error_norm_bd(&errv, y, &y_hi, rtol, atol);
     (y_hi, errn)
+}
+
+fn push_sample(result: &mut Vec<f64>, y: &[BD], t: f64, n: usize) {
+    for i in 0..n {
+        let o = 6 * i;
+        result.push(y[o].to_f64().unwrap());
+        result.push(y[o + 1].to_f64().unwrap());
+        result.push(y[o + 2].to_f64().unwrap());
+    }
+    result.push(t);
 }
 
 // ---------- Public evolve (same API) ----------
@@ -245,8 +228,6 @@ pub fn evolve(bodies: &mut [Body], t_end: f64) -> (Vec<f64>, f64) {
     const P: f64 = 14.0;
     const INV_EXP: f64 = 1.0 / (P + 1.0); // 1/15
 
-    let eps2_bd = BD::zero(); // or bd("1e-16") etc for softening
-
     let mut y = pack_state_bd(bodies);
     let mut t = 0.0;
 
@@ -255,49 +236,40 @@ pub fn evolve(bodies: &mut [Body], t_end: f64) -> (Vec<f64>, f64) {
     let mut h = (t_end - t).abs().max(1e-16) * 1e-3 * dir;
 
     let mut result = Vec::<f64>::new();
+    push_sample(&mut result, &y, t, n_b);
+
     let max_steps = 10_000_000usize;
     let mut steps = 0usize;
 
     while (t - t_end).abs() > 0.0 && steps < max_steps {
-        // record
-        for i in 0..n_b {
-            let o = 6 * i;
-            result.push(y[o].to_f64().unwrap());
-            result.push(y[o + 1].to_f64().unwrap());
-            result.push(y[o + 2].to_f64().unwrap());
-        }
-        result.push(t);
-
-        // clamp final step if needed
-        if (t_end - t).abs() <= 0.5 * h.abs() || ((t + h - t_end) * dir) > 0.0 {
+        // Don’t overshoot t_end
+        if (t + h - t_end) * dir > 0.0 {
             h = t_end - t;
         }
 
-        let (y_trial, errn) = erk_trial_bd(&y, h, &masses_bd, &eps2_bd, RTOL, ATOL);
+        let (y_trial, errn) = erk_trial_bd(&y, h, &masses_bd, RTOL, ATOL);
 
         if errn <= 1.0 || ((t - t_end) * dir) >= 0.0 {
             // accept
             y = y_trial;
             t += h;
+            push_sample(&mut result, &y, t, n_b);
+
             let fac = if errn == 0.0 {
                 FAC_MAX
             } else {
-                SAFETY * errn.powf(-INV_EXP)
+                (SAFETY * errn.powf(-INV_EXP)).clamp(FAC_MIN, FAC_MAX)
             };
-            h *= fac.clamp(FAC_MIN, FAC_MAX);
+            h *= fac;
         } else {
-            // reject
-            let fac = SAFETY * errn.powf(-INV_EXP);
-            h *= fac.clamp(0.1, 0.5);
-            continue;
+            // reject -> shrink
+            let fac = (SAFETY * errn.powf(-INV_EXP)).clamp(0.1, 0.5);
+            h *= fac;
         }
 
         steps += 1;
         if h.abs() < 1e-18 {
             break;
-        }
-        if ((t - t_end) * dir) > 0.0 {
-            h = t_end - t;
         }
     }
 
