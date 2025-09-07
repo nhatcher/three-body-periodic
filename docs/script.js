@@ -28,6 +28,8 @@ const timeSlider = document.getElementById('control-time');
 const exampleClassDropdown = document.getElementById('example-class');
 const exampleSelect = document.getElementById('example');
 const methodSelect = document.getElementById('method');
+const header = document.getElementsByTagName('header')[0];
+const canvasWrap = document.getElementById('canvasWrap');
 
 // Runtime
 let paths = [[], [], []];
@@ -220,6 +222,20 @@ document.getElementById('canvasWrap').addEventListener('keydown', (evt) => {
             break;
     }
 });
+
+const legend = document.getElementById('legend');
+document.getElementById('legend-toggle').addEventListener('click', () => {
+    if (legend.dataset.display === 'true') {
+        legend.dataset.display = 'false';
+    } else {
+        legend.dataset.display = 'true';
+    }
+    play_loop();
+});
+
+
+canvasWrap.style.height = `calc(100vh - ${header.clientHeight + 100}px)`;
+
 
 
 // const recordBtn = document.getElementById('record');

@@ -16,8 +16,13 @@ function resizeCanvas() {
 }
 
 function drawLegend(masses, energy, angularMomentum, period) {
+    const legendContent = document.getElementById('legend-content');
     const legend = document.getElementById('legend');
-    legend.innerHTML = '';
+    if (legend.dataset.display === 'false') {
+        legendContent.innerHTML = '';
+        return;
+    }
+    legendContent.innerHTML = '';
     ['Body 1', 'Body 2', 'Body 3'].forEach((label, i) => {
         const row = document.createElement('div');
         const sw = document.createElement('span');
@@ -27,7 +32,7 @@ function drawLegend(masses, energy, angularMomentum, period) {
         txt.textContent = `${label}  (m = ${masses[i]})`;
         row.appendChild(sw);
         row.appendChild(txt);
-        legend.appendChild(row);
+        legendContent.appendChild(row);
     });
 
     // Energy
@@ -35,21 +40,21 @@ function drawLegend(masses, energy, angularMomentum, period) {
     const txt = document.createElement('span');
     txt.textContent = `Energy: ${energy}`;
     row.appendChild(txt);
-    legend.appendChild(row);
+    legendContent.appendChild(row);
 
     // Angular Momentum
     const row2 = document.createElement('div');
     const txt2 = document.createElement('span');
     txt2.textContent = `Angular Momentum: ${angularMomentum[2]}`;
     row2.appendChild(txt2);
-    legend.appendChild(row2);
+    legendContent.appendChild(row2);
 
     // Period
     const row3 = document.createElement('div');
     const txt3 = document.createElement('span');
     txt3.textContent = `Period: ${period} seconds`;
     row3.appendChild(txt3);
-    legend.appendChild(row3);
+    legendContent.appendChild(row3);
 }
 
 export { drawLegend, resizeCanvas, colors };
