@@ -18,6 +18,7 @@ body {
 }
 header {
   padding: 12px 16px;
+  box-sizing: content-box;
   display: flex;
   gap: 12px;
   align-items: center;
@@ -30,15 +31,32 @@ header {
 
 .controls {
   display: flex;
-  flex-wrap: wrap;
   gap: 10px;
   align-items: end;
   margin: auto;
 }
+
+@media screen and (max-width: 600px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+}
+
 .control {
+  /* width: 100%; */
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+@media screen and (max-width: 600px) {
+  .control.row-small {
+    flex-direction: row;
+  }
+  .control.row-small label {
+    display: none;
+  }
 }
 .control-div {
   display: flex;
@@ -159,11 +177,21 @@ button:disabled {
   text-align: center;
 }
 
-/* range slider */
-input[type="range"] {
-  width: 260px;
+
+#control-time {
   accent-color: var(--accent);
-  padding-right: 0px;
+  padding: 8px 0px;
+}
+
+@media screen and (max-width: 600px) {
+  #control-time {
+    width: 100%;
+  }
+}
+@media screen and (min-width: 600px) {
+  #control-time {
+    width: 260px;
+  }
 }
 
 #method {
@@ -191,4 +219,13 @@ input[type="range"] {
 
 #pause {
   margin-right: 5px;
+}
+
+@media screen and (max-width: 600px) {
+  #example-class {
+    width: 150px;
+  }
+  #coords {
+    display: none;
+  }
 }
