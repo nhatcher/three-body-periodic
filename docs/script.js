@@ -22,7 +22,8 @@ await workerReady;
 // Globals
 const canvas = document.getElementById('plot');
 const statusEl = document.getElementById('status');
-const runButton = document.getElementById('run');
+const playButton = document.getElementById('play');
+const pauseButton = document.getElementById('pause');
 const timeSlider = document.getElementById('control-time');
 const exampleClassDropdown = document.getElementById('example-class');
 const exampleSelect = document.getElementById('example');
@@ -44,7 +45,7 @@ let latestRequestId = 0;
 
 
 function play_loop() {
-    if (runButton.innerText === 'Pause') {
+    if (playButton.dataset.state === 'playing') {
         const sliderValue = parseFloat(timeSlider.value);
         const maxTime = parseFloat(timeSlider.max);
         if (sliderValue >= maxTime) {
@@ -62,13 +63,12 @@ function play_loop() {
 
 
 async function run() {
-    runButton.innerText = 'Play';
-    runButton.disabled = true;
+    playButton.disabled = true;
+    pauseButton.disabled = true;
     statusEl.classList.remove('error');
     try {
         // Read the initial conditions and compute the orbit parameters
         const [icRaw, t, theta_max] = await readIC2D();
-        console.log(icRaw, t, theta_max);
         masses = [icRaw[6], icRaw[13], icRaw[20]];
         period = t;
         𝜃_max = theta_max || 0;
@@ -126,18 +126,28 @@ async function run() {
         statusEl.textContent = 'Error: ' + (err?.message || String(err));
         statusEl.classList.add('error');
     } finally {
-        runButton.disabled = false;
+        if (playButton.dataset.state === 'playing') {
+            playButton.disabled = true;
+            pauseButton.disabled = false;
+        } else {
+            playButton.disabled = false;
+            pauseButton.disabled = true;
+        }
     }
 }
 
-runButton.addEventListener('click', () => {
-    if (runButton.innerText === 'Play') {
-        runButton.innerText = 'Pause';
-        play_loop();
-    } else {
-        runButton.innerText = 'Play';
-        play_loop();
-    }
+playButton.addEventListener('click', () => {
+    playButton.dataset.state = 'playing';
+    playButton.disabled = true;
+    pauseButton.disabled = false;
+    play_loop();
+});
+
+pauseButton.addEventListener('click', () => {
+    playButton.dataset.state = 'paused';
+    playButton.disabled = false;
+    pauseButton.disabled = true;
+    play_loop();
 });
 
 function draw() {
@@ -193,10 +203,20 @@ document.getElementById('canvasWrap').addEventListener('keydown', (evt) => {
             evt.preventDefault();
             break;
         case ' ':
-            runButton.click();
+            // toggle play/pause
+            if (playButton.dataset.state === 'playing') {
+                playButton.dataset.state = 'paused';
+                playButton.disabled = false;
+                pauseButton.disabled = true;
+            } else {
+                playButton.dataset.state = 'playing';
+                playButton.disabled = true;
+                pauseButton.disabled = false;
+                play_loop();
+            }
             evt.preventDefault();
             break;
-            default:
+        default:
             break;
     }
 });

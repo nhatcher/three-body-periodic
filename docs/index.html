@@ -13,20 +13,25 @@
   <header>
     <div class="controls">
       <div class="control">
-        <label for="control-time">Playback (0 → t)</label>
         <input id="control-time" type="range" min="0" max="1000" step="1" value="1000" />
-        <div>
+        <div style="display: flex;">
+          <!-- <label for="control-time">Playback (0 → t)</label>-->
+          <span style="flex-grow: 1;"></span> 
           <!-- <button id="record" class="primary">Record video</button> -->
-          <button id="new-example" class="primary">Edit</button>
-          <button class="primary" id="run">Pause</button>
+          <button class="primary" id="pause" disabled><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-pause-icon lucide-circle-pause"><circle cx="12" cy="12" r="10"/><line x1="10" x2="10" y1="15" y2="9"/><line x1="14" x2="14" y1="15" y2="9"/></svg></button>
+          <button class="primary" id="play"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play-icon lucide-circle-play"><path d="M9 9.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997A1 1 0 0 1 9 14.996z"/><circle cx="12" cy="12" r="10"/></svg></button>
         </div>
         <div class="control-div">
+          <label for="method" class="label-left">Solver</label>
           <select id="method">
-            <option value="dop853">DOP853 (high accuracy)</option>
-            <option value="rk4">RK4 (low accuracy)</option>
-            <option value="verlet">Velocity Verlet (low accuracy)</option>
-            <!-- <option value="dop853_hp">DOP853 (high precision)</option> -->
-            <option value="feagin14">Feagin14 (high precision)</option>
+            <optgroup label="Recommended">
+            <option value="dop853">DOP853</option>
+            <option value="feagin14">Feagin14</option>
+            </optgroup>
+            <optgroup label="Other Integrators">
+            <option value="rk4">RK4</option>
+            <option value="verlet">Velocity Verlet</option>
+            </optgroup>
           </select>
           <button id="method-btn" class="info-btn" data-for="method" aria-label="Explain the selected integrator" aria-controls="info-pop">?</button>
         </div>
@@ -53,8 +58,10 @@
           <label for="example">Select example</label>
           <button id="example-btn" class="info-btn" data-for="example" aria-haspopup="dialog" aria-controls="info-dialog" title="What is this?">?</button>
         </div>
+        <div class="control-div">
         <select id="example"></select>
-        
+        <button id="new-example" class="primary">Edit</button>
+        </div>
       </div>
     </div>
   </header>
@@ -141,44 +148,34 @@
   </form>
 </dialog>
 
-<template id="info-header-method">
-  <h2 id="info-title">ODE Integrator</h2>
-  <p>Choose here the numerical integration method used to solve the there body problem (Recommended DOP853)</p>
-  <p>The differential equation is solved in a web-worker</p>
-</template>
-
 <template id="info-header-example-class">
   <h2 id="info-title">Example Class</h2>
   <p>You will find here different classes of examples of periodic 3 body orbits</p>
 </template>
 
 <!-- METHOD helps -->
-<template id="help-method-dop853">
+<template id="help-method">
+  <h1>ODE numerical solvers</h1>
+  <p>Choose here the numerical integration method used to solve the there body problem (Recommended DOP853)</p>
+  <p>The differential equation is solved in a web-worker</p>
   <h2 id="info-title">DOP853 (8(5,3))</h2>
-  <p>Dormand-Prince method of order 8. Great default for accuracy. Variable step size, small energy drift over very long spans.</p>
-</template>
-
-<template id="help-method-rk4">
+  <p>Dormand-Prince method of order 8. This is the recommended method for most problems.</p>
+  <h2 id="info-title">Feagin 14(12)</h2>
+  <p>Very high-order explicit RK with embedded error. Heavy but superb when you need extreme accuracy/precision.</p>
+  <p>Uses multiple precision arithmetic. Solving an example might take minutes or hours.</p>
   <h2 id="info-title">RK4</h2>
   <p>Classic fixed-step 4th order. Simple to code and understand. It generally doesn't perform well in these examples</p>
-</template>
-
-<template id="help-method-verlet">
   <h2 id="info-title">Velocity Verlet</h2>
   <p>Symplectic 2nd order—great long-term energy behavior for Hamiltonian systems with a suitably small dt.</p>
   <p>It is here just as an example</p>
 </template>
 
-<template id="help-method-feagin14">
-  <h2 id="info-title">Feagin 14(12)</h2>
-  <p>Very high-order explicit RK with embedded error. Heavy but superb when you need extreme accuracy/precision.</p>
-  <p>Uses multiple precision arithmetic. Solving an example might take minutes or hours.</p>
-</template>
-
 <!-- EXAMPLE-CLASS helps -->
 <template id="help-example-choreographies">
   <h2 id="info-title">Choreographies</h2>
-  <p>All three bodies share a single closed curve (e.g., figure-eight). Sensitive to tolerances; use adaptive methods.</p>
+  <p>All three bodies share the same orbit.</p> <p>It is hypnotic to see them dance around the same path.</p>
+  <p>The by now well known "eight-figure" choreography is a remarkable example (discovered by <a href="https://doi.org/10.1103/PhysRevLett.70.3675" target="_blank" rel="noopener noreferrer">Moore in 1993</a>), and by <a href="https://doi.org/10.1007/s002200000269" target="_blank" rel="noopener noreferrer">Chenciner and Montgomery in 2000</a>).</p>
+  <p>The examples here where discovered by Carles Simó (Paul Masson rescued the initial conditions in <a href="https://analyticphysics.com/Gravitational%20Choreographies/Sim%C3%B3's%20Three-Body%20Choreographies%20in%20Action.htm" target="_blank" rel="noopener noreferrer">here</a>)</p>
 </template>
 
 <template id="help-example-equal_mass">

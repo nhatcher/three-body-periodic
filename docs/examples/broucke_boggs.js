@@ -67,8 +67,6 @@ const DATA = [
 ];
 
 
-
-
 function buildOrbit({ m1=1/3, m2=1/3, m3=1/3, x1, v1, x2, v2, t}) {
     const m = (m1 + m2 + m3);
     const xcm = (m1 * x1 + m2 * x2 + m3 * 0) / m;

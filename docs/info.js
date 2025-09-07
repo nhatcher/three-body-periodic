@@ -26,7 +26,7 @@ exampleClassBtn.addEventListener('click', (e)  => {
 });
 
 methodBtn.addEventListener('click', () => {
-    const templateId = `help-method-${methodSelect.value}`;
+    const templateId = `help-method`;
     const template = document.getElementById(templateId);
     infoContent.replaceChildren(template.content.cloneNode(true));
     infoDialog.showModal();

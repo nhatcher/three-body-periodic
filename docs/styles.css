@@ -163,4 +163,32 @@ button:disabled {
 input[type="range"] {
   width: 260px;
   accent-color: var(--accent);
+  padding-right: 0px;
+}
+
+#method {
+  min-width: 150px;
+}
+
+.label-left {
+  padding-right: 5px;
+}
+
+#method-btn {
+  margin-right: 5px;
+}
+
+#play svg, #pause svg {
+  vertical-align: middle;
+}
+#play, #pause {
+  padding: 8px;;
+}
+#example {
+  flex-grow: 1;
+  margin-right: 5px;
+}
+
+#pause {
+  margin-right: 5px;
 }
