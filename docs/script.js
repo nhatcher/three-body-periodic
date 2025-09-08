@@ -30,6 +30,9 @@ const exampleSelect = document.getElementById('example');
 const methodSelect = document.getElementById('method');
 const header = document.getElementsByTagName('header')[0];
 const canvasWrap = document.getElementById('canvasWrap');
+const bookmarkBtn = document.getElementById('bookmark');
+const cycleThroughBtn = document.getElementById('cycle-through');
+const stopCycleThroughBtn = document.getElementById('stop-cycle-through');
 
 // Runtime
 let paths = [[], [], []];
@@ -139,17 +142,12 @@ async function run() {
 }
 
 playButton.addEventListener('click', () => {
-    playButton.dataset.state = 'playing';
-    playButton.disabled = true;
-    pauseButton.disabled = false;
+    setPlay();
     play_loop();
 });
 
 pauseButton.addEventListener('click', () => {
-    playButton.dataset.state = 'paused';
-    playButton.disabled = false;
-    pauseButton.disabled = true;
-    play_loop();
+    setPause();
 });
 
 function draw() {
@@ -165,11 +163,13 @@ timeSlider.addEventListener('input', draw);
 exampleClassDropdown.addEventListener('change', async () => {
     await fill_example_dropdown();
     updateUrl();
+    updateBookmarkButtons();
     await run();
     play_loop();
 });
 exampleSelect.addEventListener('change', async () => {
     updateUrl();
+    updateBookmarkButtons();
     await run();
     play_loop();
 });
@@ -190,30 +190,50 @@ function updateUrl() {
     window.history.replaceState({}, "", newUrl);
 }
 
+function nextExample() {
+    // choose the next example in dropdown
+    exampleSelect.selectedIndex = (exampleSelect.selectedIndex + 1) % exampleSelect.options.length;
+    exampleSelect.dispatchEvent(new Event('change'));
+}
+
+function previousExample() {
+    // choose the previous example in dropdown
+    exampleSelect.selectedIndex = (exampleSelect.selectedIndex - 1 + exampleSelect.options.length) % exampleSelect.options.length;
+    exampleSelect.dispatchEvent(new Event('change'));
+}
+
+function setPlay() {
+    playButton.dataset.state = 'playing';
+    playButton.disabled = true;
+    pauseButton.disabled = false;
+    playButton.style.display = "none";
+    pauseButton.style.display = "block";
+}
+
+function setPause() {
+    playButton.dataset.state = 'paused';
+    playButton.disabled = false;
+    pauseButton.disabled = true;
+    playButton.style.display = "block";
+    pauseButton.style.display = "none";
+}
+
 document.getElementById('canvasWrap').addEventListener('keydown', (evt) => {
     switch (evt.key) {
         case 'ArrowLeft':
-            // choose the previous example in dropdown
-            exampleSelect.selectedIndex = (exampleSelect.selectedIndex - 1 + exampleSelect.options.length) % exampleSelect.options.length;
-            exampleSelect.dispatchEvent(new Event('change'));
+            previousExample();
             evt.preventDefault();
             break;
         case 'ArrowRight':
-            // choose the next example in dropdown
-            exampleSelect.selectedIndex = (exampleSelect.selectedIndex + 1) % exampleSelect.options.length;
-            exampleSelect.dispatchEvent(new Event('change'));
+            nextExample();
             evt.preventDefault();
             break;
         case ' ':
             // toggle play/pause
             if (playButton.dataset.state === 'playing') {
-                playButton.dataset.state = 'paused';
-                playButton.disabled = false;
-                pauseButton.disabled = true;
+                setPause();
             } else {
-                playButton.dataset.state = 'playing';
-                playButton.disabled = true;
-                pauseButton.disabled = false;
+                setPlay();
                 play_loop();
             }
             evt.preventDefault();
@@ -233,6 +253,65 @@ document.getElementById('legend-toggle').addEventListener('click', () => {
     play_loop();
 });
 
+let timeId = null;
+cycleThroughBtn.addEventListener('click', () => {
+    cycleThroughBtn.disabled = true;
+    stopCycleThroughBtn.disabled = false;
+    cycleThroughBtn.style.display = "none";
+    stopCycleThroughBtn.style.display = "block";
+    timeId = setInterval(nextExample, 1000);
+});
+
+stopCycleThroughBtn.addEventListener('click', () => {
+    cycleThroughBtn.disabled = false;
+    stopCycleThroughBtn.disabled = true;
+    cycleThroughBtn.style.display = "block";
+    stopCycleThroughBtn.style.display = "none";
+    clearInterval(timeId);
+    timeId = null;
+});
+
+function removeBookmark(className, index) {
+    const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+    const newBookmarks = bookmarks.filter(b => b.class !== className || b.index !== index);
+    localStorage.setItem('bookmarks', JSON.stringify(newBookmarks));
+}
+
+function isBookmarked(className, index) {
+    const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+    return bookmarks.some(b => b.class === className && b.index === index);
+}
+
+const removeBookmarkBtn = document.getElementById('remove-bookmark');
+removeBookmarkBtn.addEventListener('click', () => {
+    const className = exampleClassDropdown.value;
+    const index = exampleSelect.value;
+    removeBookmark(className, index);
+    updateBookmarkButtons()
+});
+
+function updateBookmarkButtons() {
+    const className = exampleClassDropdown.value;
+    const index = exampleSelect.value;
+    if (isBookmarked(className, index)) {
+        bookmarkBtn.style.display = 'none';
+        removeBookmarkBtn.style.display = 'block';
+    } else {
+        bookmarkBtn.style.display = 'block';
+        removeBookmarkBtn.style.display = 'none';
+    }
+}
+
+bookmarkBtn.addEventListener('click', () => {
+    const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+    bookmarks.push({
+        class: exampleClassDropdown.value,
+        index: exampleSelect.value,
+        name: exampleSelect.options[exampleSelect.selectedIndex].textContent,
+    });
+    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    updateBookmarkButtons();
+});
 
 canvasWrap.style.height = `calc(100vh - ${header.clientHeight + 100}px)`;
 

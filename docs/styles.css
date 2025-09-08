@@ -221,20 +221,25 @@ button:disabled {
   vertical-align: middle;
 }
 #play, #pause {
-  padding: 8px;;
+  padding: 8px;
 }
+#bookmark, #cycle-through, #stop-cycle-through, #remove-bookmark {
+  padding: 8px;
+  margin-right: 5px;
+}
+
+#stop-cycle-through, #pause, #remove-bookmark {
+  display: none;
+}
+
 #example {
   flex-grow: 1;
   margin-right: 5px;
 }
 
-#pause {
-  margin-right: 5px;
-}
-
 @media screen and (max-width: 600px) {
-  #example-class {
-    width: 150px;
+  #example-class, #example {
+    width: 140px;
   }
   #coords {
     display: none;

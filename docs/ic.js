@@ -13,48 +13,47 @@ import matt_sheen from './examples/matt_sheen.js';
 const exampleClassDropdown = document.getElementById('example-class');
 const exampleSelect = document.getElementById('example');
 
+
+function getModuleByName(name) {
+    switch (name) {
+        case 'choreographies':
+            return choreographies;
+        case 'free_fall':
+            return free_fall;
+        case 'unequal_mass':
+            return unequal_mass;
+        case 'equal_mass':
+            return equal_mass;
+        case '3d_examples':
+            return examples3d;
+        case 'free_fall_puzynin_sd':
+            return free_fall_puzynin_sd;
+        case 'free_fall_puzynin_600':
+            return free_fall_puzynin_600;
+        case 'bhh_satellites':
+            return bhh_satellites;
+        case 'broucke_boggs':
+            return broucke_boggs;
+        case 'matt_sheen':
+            return matt_sheen;
+        case 'custom':
+            return custom_examples;
+        default:
+            throw new Error(`Unknown example class: ${name}`);
+    }
+}
+
 async function readIC2D() {
     const exampleClass = exampleClassDropdown.value;
     const example = exampleSelect.value;
-    let values;
-    switch (exampleClass) {
-        case 'choreographies':
-            values = choreographies.getOrbit(example);
-            break;
-        case 'free_fall':
-            values = free_fall.getOrbit(example);
-            break;
-        case 'unequal_mass':
-            values = unequal_mass.getOrbit(example);
-            break;
-        case 'equal_mass':
-            values = equal_mass.getOrbit(example);
-            break;
-        case '3d_examples':
-            values = await examples3d.getOrbit(example);
-            break;
-        case 'custom':
-            values = await custom_examples.getOrbit(example);
-            break;
-        case 'free_fall_puzynin_sd':
-            values = await free_fall_puzynin_sd.getOrbit(example);
-            break;
-        case 'free_fall_puzynin_600':
-            values = await free_fall_puzynin_600.getOrbit(example);
-            break;
-        case 'bhh_satellites':
-            values = bhh_satellites.getOrbit(example);
-            break;
-        case 'broucke_boggs':
-            values = broucke_boggs.getOrbit(example);
-            break;
-        case 'matt_sheen':
-            values = matt_sheen.getOrbit(example);
-            break;
-        default:
-            throw new Error(`Unknown example class: ${exampleClass}`);
+    if (exampleClass === 'bookmarks') {
+        const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+        const bm = bookmarks[example];
+        const className = bm.class;
+        const index = bm.index;
+        return getModuleByName(className).getOrbit(index);
     }
-    return values;
+    return getModuleByName(exampleClass).getOrbit(example);
 }
 
 
@@ -63,50 +62,36 @@ async function fill_example_dropdown() {
 
     // Clear existing options
     exampleSelect.innerHTML = '';
-    let examples;
-    switch (exampleClass) {
-        case 'choreographies':
-            examples = choreographies.getNames();
-            break;
-        case 'free_fall':
-            examples = free_fall.getNames();
-            break;
-        case 'unequal_mass':
-            examples = unequal_mass.getNames();
-            break;
-        case 'equal_mass':
-            examples = equal_mass.getNames();
-            break;
-        case 'choreographies':
-            examples = choreographies.getNames();
-            break;
-        case '3d_examples':
-            examples = await examples3d.getNames();
-            break;
-        case 'free_fall_puzynin_sd':
-            examples = await free_fall_puzynin_sd.getNames();
-            break;
-        case 'free_fall_puzynin_600':
-            examples = await free_fall_puzynin_600.getNames();
-            break;
-        case 'bhh_satellites':
-            examples = bhh_satellites.getNames();
-            break;
-        case 'broucke_boggs':
-            examples = broucke_boggs.getNames();
-            break;
-        case 'matt_sheen':
-            examples = matt_sheen.getNames();
-            break;
-        case 'custom':
-            examples = custom_examples.getNames();
-            examples.forEach(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                exampleSelect.appendChild(option);
-            });
+    if (exampleClass === 'bookmarks') {
+        const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+        if (bookmarks.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'No bookmarks';
+            exampleSelect.appendChild(option);
+            exampleSelect.disabled = true;
             return;
+        }
+        exampleSelect.disabled = false;
+        bookmarks.map((bm, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = bm.name;
+            exampleSelect.appendChild(option);
+        });
+        return;
+    }
+    let examples = await getModuleByName(exampleClass).getNames();
+    if (exampleClass === 'custom') {
+        examples.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            exampleSelect.appendChild(option);
+        });
+        return;
+    } else {
+        exampleSelect.disabled = false;
     }
     examples.forEach((name, index) => {
         const option = document.createElement('option');
