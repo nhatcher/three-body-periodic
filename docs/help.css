@@ -2,6 +2,33 @@
   overflow: auto;
   min-height: 420px;
   line-height: 1.45;
+  font-size: 16px;
+  font-family: "Courier New", Courier, monospace;
+}
+
+/* warm orange */
+:root {
+  --title-accent: 30 95% 62%;
+}
+
+/* full-width underline across the content column */
+.help-body h2 {
+  font-size: 20px;
+  position: relative;
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  color: #e8edf2;
+  font-weight: 800;
+}
+.help-body h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: hsl(var(--title-accent) / 0.9);
+  border-radius: 2px;
 }
 
 .help-body p {
@@ -62,4 +89,34 @@
   .help-body {
     padding: 0 2px 8px;
   }
+}
+
+/* Lime Zest */
+:root {
+  --link-fg: #f6ffea;
+  --link-accent: 85 80% 50%;
+} /* ~#A3E635 */
+
+/* Base link style for dark backgrounds */
+a {
+  text-decoration: none;
+  color: var(--link-fg, #e6f1f5);
+  font-weight: 700;
+  /* per-line stripe that wraps */
+  background-image: linear-gradient(
+    hsl(var(--link-accent) / 0.7),
+    hsl(var(--link-accent) / 0.7)
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 2px; /* stripe height */
+  background-position: 0 100%;
+
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+
+  padding: 0 0.06em; /* makes stripe reach line edges */
+  transition: background-size 0.3s ease;
+}
+a:hover {
+  background-size: 100% 100%;
 }

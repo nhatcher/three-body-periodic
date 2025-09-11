@@ -181,14 +181,15 @@ function draw2D(paths, times, masses, energy, angularMomentum, period, 𝜃_max)
         ctx.moveTo(x0, y0);
         let k = 1;
         for (let kk = 1; kk < l; kk++) {
-            if (times[kk] <= factor * period) {
-                k = kk;
-            } else if (!fullPaths) {
-                break;
-            }
             const [p1, q1] = rotate(pts[kk][0], pts[kk][1], w, times[kk]);
             const [x, y] = toCanvas(p1, q1);
             ctx.lineTo(x, y);
+            if (times[kk] <= factor * period) {
+                k = kk;
+            } else if (!fullPaths) {
+                k = kk;
+                break;
+            }
         }
         ctx.lineWidth = 2.0; ctx.strokeStyle = colors[i]; ctx.stroke();
 
@@ -199,7 +200,7 @@ function draw2D(paths, times, masses, energy, angularMomentum, period, 𝜃_max)
             ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2); ctx.strokeStyle = colors[i]; ctx.stroke();
         }
         // End marker
-        const [p, q] = rotate(pts[k - 1][0], pts[k - 1][1], w, times[k - 1]);
+        const [p, q] = rotate(pts[k][0], pts[k][1], w, times[k]);
         const [ex, ey] = toCanvas(p, q);
         ctx.beginPath(); ctx.arc(ex, ey, 5, 0, Math.PI * 2); ctx.fillStyle = colors[i]; ctx.fill();
     });
