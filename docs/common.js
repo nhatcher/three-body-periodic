@@ -18,10 +18,13 @@ function resizeCanvas() {
 function drawLegend(masses, energy, angularMomentum, period) {
     const legendContent = document.getElementById('legend-content');
     const legend = document.getElementById('legend');
+    const toggle = document.getElementById('legend-toggle');
     if (legend.dataset.display === 'false') {
         legendContent.innerHTML = '';
+        toggle.textContent = '+';
         return;
     }
+    toggle.textContent = '–';
     legendContent.innerHTML = '';
     ['Body 1', 'Body 2', 'Body 3'].forEach((label, i) => {
         const row = document.createElement('div');

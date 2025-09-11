@@ -1,4 +1,4 @@
-import { recordWebM } from './video.js';
+// import { recordWebM } from './video.js';
 import { clear2D, draw2D } from './2d.js';
 import { draw3D } from './3d.js';
 import { fill_example_dropdown, readIC2D } from './ic.js';
@@ -20,7 +20,7 @@ let workerReady = new Promise((resolve) => {
 await workerReady;
 
 // Globals
-const canvas = document.getElementById('plot');
+// const canvas = document.getElementById('plot');
 const statusEl = document.getElementById('status');
 const playButton = document.getElementById('play');
 const pauseButton = document.getElementById('pause');
@@ -33,6 +33,7 @@ const canvasWrap = document.getElementById('canvasWrap');
 const bookmarkBtn = document.getElementById('bookmark');
 const cycleThroughBtn = document.getElementById('cycle-through');
 const stopCycleThroughBtn = document.getElementById('stop-cycle-through');
+const removeBookmarkBtn = document.getElementById('remove-bookmark');
 
 // Runtime
 let paths = [[], [], []];
@@ -43,10 +44,11 @@ let angularMomentum = [0, 0, 0];
 let period = 0;
 let 𝜃_max = 0;  // max angle (for BHH examples)
 
-
 // For racing requests (dropdown changes quickly, etc.)
 let nextRequestId = 1;
 let latestRequestId = 0;
+
+let slideshowTimeId = null;
 
 
 function play_loop() {
@@ -65,9 +67,11 @@ function play_loop() {
     }
 }
 
+function setSliderMax() {
+    timeSlider.value = timeSlider.max;
+}
 
-
-async function run() {
+async function computeExample() {
     playButton.disabled = true;
     pauseButton.disabled = true;
     statusEl.classList.remove('error');
@@ -141,15 +145,6 @@ async function run() {
     }
 }
 
-playButton.addEventListener('click', () => {
-    setPlay();
-    play_loop();
-});
-
-pauseButton.addEventListener('click', () => {
-    setPause();
-});
-
 function draw() {
     if (exampleClassDropdown.value === '3d_examples') {
         draw3D(paths, times, masses, energy, angularMomentum, period);
@@ -157,26 +152,6 @@ function draw() {
         draw2D(paths, times, masses, energy, angularMomentum, period, 𝜃_max);
     }
 }
-
-window.addEventListener('resize', draw);
-timeSlider.addEventListener('input', draw);
-exampleClassDropdown.addEventListener('change', async () => {
-    await fill_example_dropdown();
-    updateUrl();
-    updateBookmarkButtons();
-    await run();
-    play_loop();
-});
-exampleSelect.addEventListener('change', async () => {
-    updateUrl();
-    updateBookmarkButtons();
-    await run();
-    play_loop();
-});
-methodSelect.addEventListener('change', async () => {
-    await run();
-    play_loop();
-});
 
 function updateUrl() {
     const params = new URLSearchParams(window.location.search);
@@ -192,12 +167,16 @@ function updateUrl() {
 
 function nextExample() {
     // choose the next example in dropdown
+    setPause();
+    setSliderMax();
     exampleSelect.selectedIndex = (exampleSelect.selectedIndex + 1) % exampleSelect.options.length;
     exampleSelect.dispatchEvent(new Event('change'));
 }
 
 function previousExample() {
     // choose the previous example in dropdown
+    setPause();
+    setSliderMax();
     exampleSelect.selectedIndex = (exampleSelect.selectedIndex - 1 + exampleSelect.options.length) % exampleSelect.options.length;
     exampleSelect.dispatchEvent(new Event('change'));
 }
@@ -217,6 +196,83 @@ function setPause() {
     playButton.style.display = "block";
     pauseButton.style.display = "none";
 }
+
+function removeBookmark(className, index) {
+    const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+    const newBookmarks = bookmarks.filter(b => b.class !== className || b.index !== index);
+    localStorage.setItem('bookmarks', JSON.stringify(newBookmarks));
+}
+
+function isBookmarked(className, index) {
+    const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+    return bookmarks.some(b => b.class === className && b.index === index);
+}
+
+function updateBookmarkButtons() {
+    const className = exampleClassDropdown.value;
+    const index = exampleSelect.value;
+    if (isBookmarked(className, index)) {
+        bookmarkBtn.style.display = 'none';
+        removeBookmarkBtn.style.display = 'block';
+    } else {
+        bookmarkBtn.style.display = 'block';
+        removeBookmarkBtn.style.display = 'none';
+    }
+}
+
+async function fillFromURL() {
+    const params = new URLSearchParams(window.location.search);
+
+    // Example: ?class=equal_mass&index=3
+    const classParam = params.get("class");   // e.g. "equal_mass"
+    const indexParam = params.get("index");   // e.g. "3"
+
+
+    // Apply to dropdowns if values exist
+    if (classParam) {
+        exampleClassDropdown.value = classParam;
+    }
+    await fill_example_dropdown();
+
+    if (indexParam) {
+        exampleSelect.value = indexParam;
+    }
+}
+
+/// Setup event handlers
+
+window.addEventListener('resize', draw);
+
+playButton.addEventListener('click', () => {
+    setPlay();
+    play_loop();
+});
+
+pauseButton.addEventListener('click', () => {
+    setPause();
+});
+
+timeSlider.addEventListener('input', draw);
+
+exampleClassDropdown.addEventListener('change', async () => {
+    await fill_example_dropdown();
+    updateUrl();
+    updateBookmarkButtons();
+    await computeExample();
+    play_loop();
+});
+
+exampleSelect.addEventListener('change', async () => {
+    updateUrl();
+    updateBookmarkButtons();
+    await computeExample();
+    play_loop();
+});
+
+methodSelect.addEventListener('change', async () => {
+    await computeExample();
+    play_loop();
+});
 
 document.getElementById('canvasWrap').addEventListener('keydown', (evt) => {
     switch (evt.key) {
@@ -243,8 +299,8 @@ document.getElementById('canvasWrap').addEventListener('keydown', (evt) => {
     }
 });
 
-const legend = document.getElementById('legend');
 document.getElementById('legend-toggle').addEventListener('click', () => {
+    const legend = document.getElementById('legend');
     if (legend.dataset.display === 'true') {
         legend.dataset.display = 'false';
     } else {
@@ -253,13 +309,19 @@ document.getElementById('legend-toggle').addEventListener('click', () => {
     play_loop();
 });
 
-let timeId = null;
+document.getElementById('github').addEventListener('click', () => {
+    // Open the GitHub repo in a new tab
+    window.open('https://github.com/nhatcher/three-body-periodic');
+});
+
+/// Slide show buttons
+
 cycleThroughBtn.addEventListener('click', () => {
     cycleThroughBtn.disabled = true;
     stopCycleThroughBtn.disabled = false;
     cycleThroughBtn.style.display = "none";
     stopCycleThroughBtn.style.display = "block";
-    timeId = setInterval(nextExample, 1000);
+    slideshowTimeId = setInterval(nextExample, 1000);
 });
 
 stopCycleThroughBtn.addEventListener('click', () => {
@@ -267,40 +329,26 @@ stopCycleThroughBtn.addEventListener('click', () => {
     stopCycleThroughBtn.disabled = true;
     cycleThroughBtn.style.display = "block";
     stopCycleThroughBtn.style.display = "none";
-    clearInterval(timeId);
-    timeId = null;
+    clearInterval(slideshowTimeId);
+    slideshowTimeId = null;
 });
 
-function removeBookmark(className, index) {
-    const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
-    const newBookmarks = bookmarks.filter(b => b.class !== className || b.index !== index);
-    localStorage.setItem('bookmarks', JSON.stringify(newBookmarks));
-}
+document.getElementById('next-example').addEventListener('click', () => {
+    nextExample();
+});
 
-function isBookmarked(className, index) {
-    const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
-    return bookmarks.some(b => b.class === className && b.index === index);
-}
+document.getElementById('previous-example').addEventListener('click', () => {
+    previousExample();
+});
 
-const removeBookmarkBtn = document.getElementById('remove-bookmark');
+/// Bookmark buttons
+
 removeBookmarkBtn.addEventListener('click', () => {
     const className = exampleClassDropdown.value;
     const index = exampleSelect.value;
     removeBookmark(className, index);
     updateBookmarkButtons()
 });
-
-function updateBookmarkButtons() {
-    const className = exampleClassDropdown.value;
-    const index = exampleSelect.value;
-    if (isBookmarked(className, index)) {
-        bookmarkBtn.style.display = 'none';
-        removeBookmarkBtn.style.display = 'block';
-    } else {
-        bookmarkBtn.style.display = 'block';
-        removeBookmarkBtn.style.display = 'none';
-    }
-}
 
 bookmarkBtn.addEventListener('click', () => {
     const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
@@ -313,9 +361,19 @@ bookmarkBtn.addEventListener('click', () => {
     updateBookmarkButtons();
 });
 
-canvasWrap.style.height = `calc(100vh - ${header.clientHeight + 100}px)`;
+/// dialogs
+document.getElementById('help').addEventListener('click', () => {
+    const dialog = document.getElementById('help-dialog');
+    dialog.showModal();
+});
 
+document.getElementById('settings').addEventListener('click', () => {
+    const dialog = document.getElementById('settings-dialog');
+    dialog.showModal();
+});
 
+/// Resizing
+canvasWrap.style.height = `calc(100vh - ${header.clientHeight + 30}px)`;
 
 // const recordBtn = document.getElementById('record');
 
@@ -328,27 +386,7 @@ canvasWrap.style.height = `calc(100vh - ${header.clientHeight + 100}px)`;
 //     }
 // });
 
-async function fillFromURL() {
-    const params = new URLSearchParams(window.location.search);
-
-    // Example: ?class=equal_mass&index=3
-    const classParam = params.get("class");   // e.g. "equal_mass"
-    const indexParam = params.get("index");   // e.g. "3"
-
-
-    // Apply to dropdowns if values exist
-    if (classParam) {
-        exampleClassDropdown.value = classParam;
-    }
-    await fill_example_dropdown();
-
-    if (indexParam) {
-        exampleSelect.value = indexParam;
-    }
-}
-
-
 await fillFromURL();
 
-await run();
+await computeExample();
 play_loop();

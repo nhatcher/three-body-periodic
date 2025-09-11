@@ -148,9 +148,9 @@ function rotate(p, q, w, time) {
     if (w === 0) {
         return [p, q];
     }
-    const 𝜃 = -w*time;
-    const p1 = p*Math.cos(𝜃) - q*Math.sin(𝜃);
-    const q1 = p*Math.sin(𝜃) + q*Math.cos(𝜃);
+    const 𝜃 = -w * time;
+    const p1 = p * Math.cos(𝜃) - q * Math.sin(𝜃);
+    const q1 = p * Math.sin(𝜃) + q * Math.cos(𝜃);
     return [p1, q1];
 }
 
@@ -169,6 +169,7 @@ function draw2D(paths, times, masses, energy, angularMomentum, period, 𝜃_max)
     // percentage of computed time we are drawing
     const factor = parseFloat(timeSlider.value) / parseFloat(timeSlider.max);
     const w = 𝜃_max / period;
+    const fullPaths = document.getElementById("full-paths").checked;
 
     paths.forEach((pts, i) => {
         const l = pts.length;
@@ -179,20 +180,26 @@ function draw2D(paths, times, masses, energy, angularMomentum, period, 𝜃_max)
         const [x0, y0] = toCanvas(pts[0][0], pts[0][1]);
         ctx.moveTo(x0, y0);
         let k = 1;
-        for (k = 1; k < l && times[k] <= factor * period; k++) {
-            const [p1, q1] = rotate(pts[k][0], pts[k][1], w, times[k]);
+        for (let kk = 1; kk < l; kk++) {
+            if (times[kk] <= factor * period) {
+                k = kk;
+            } else if (!fullPaths) {
+                break;
+            }
+            const [p1, q1] = rotate(pts[kk][0], pts[kk][1], w, times[kk]);
             const [x, y] = toCanvas(p1, q1);
             ctx.lineTo(x, y);
         }
         ctx.lineWidth = 2.0; ctx.strokeStyle = colors[i]; ctx.stroke();
 
-        // Start marker
-        const [sx, sy] = toCanvas(pts[0][0], pts[0][1]);
-        ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.8; ctx.fill(); ctx.globalAlpha = 1;
-        ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2); ctx.strokeStyle = colors[i]; ctx.stroke();
-
+        if (!fullPaths) {
+            // Start marker
+            const [sx, sy] = toCanvas(pts[0][0], pts[0][1]);
+            ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.8; ctx.fill(); ctx.globalAlpha = 1;
+            ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2); ctx.strokeStyle = colors[i]; ctx.stroke();
+        }
         // End marker
-        const [p, q] = rotate(pts[k - 1][0], pts[k - 1][1], w, times[k-1]);
+        const [p, q] = rotate(pts[k - 1][0], pts[k - 1][1], w, times[k - 1]);
         const [ex, ey] = toCanvas(p, q);
         ctx.beginPath(); ctx.arc(ex, ey, 5, 0, Math.PI * 2); ctx.fillStyle = colors[i]; ctx.fill();
     });
@@ -217,28 +224,28 @@ function clear2D() {
 const coordsEl = document.getElementById('coords');
 
 function onMouseMove(e) {
-  if (!fromCanvas || exampleClassDropdown.value === '3d_examples') {
-    coordsEl.textContent = '';
-    return;
-  }
-  const rect = canvas.getBoundingClientRect();
-  const cx = e.clientX - rect.left;
-  const cy = e.clientY - rect.top;
-  const [x, y] = fromCanvas(cx, cy);
-  coordsEl.textContent = `x: ${x}   y: ${y}`;
+    if (!fromCanvas || exampleClassDropdown.value === '3d_examples') {
+        coordsEl.textContent = '';
+        return;
+    }
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+    const [x, y] = fromCanvas(cx, cy);
+    coordsEl.textContent = `x: ${x}   y: ${y}`;
 }
 
 function onMouseLeave() {
-  coordsEl.textContent = '';
+    coordsEl.textContent = '';
 }
 
 // Attach once
 let coordsEventsAttached = false;
 function attachCoordEventsOnce() {
-  if (coordsEventsAttached) return;
-  canvas.addEventListener('mousemove', onMouseMove);
-  canvas.addEventListener('mouseleave', onMouseLeave);
-  coordsEventsAttached = true;
+    if (coordsEventsAttached) return;
+    canvas.addEventListener('mousemove', onMouseMove);
+    canvas.addEventListener('mouseleave', onMouseLeave);
+    coordsEventsAttached = true;
 }
 
 

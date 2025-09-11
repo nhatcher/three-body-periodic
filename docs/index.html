@@ -7,44 +7,23 @@
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="modal.css" />
   <link rel="stylesheet" href="info.css" />
+  <link rel="stylesheet" href="legend.css" />
+  <link rel="stylesheet" href="help.css" />
 </head>
 <body>
-<div class="wrap">
   <header>
     <div class="controls">
-      <div class="control">
-        <input id="control-time" type="range" min="0" max="1000" step="1" value="1000" />
-        <div style="display: flex;">
-          <!-- <label for="control-time">Playback (0 → t)</label>-->
-          <button class="primary" id="bookmark"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart-icon lucide-heart"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/></svg></button>
-          <button class="primary" id="remove-bookmark"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart-off-icon lucide-heart-off"><path d="M10.5 4.893a5.5 5.5 0 0 1 1.091.931.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 1.872-1.002 3.356-2.187 4.655"/><path d="m16.967 16.967-3.459 3.346a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5a5.5 5.5 0 0 1 2.747-4.761"/><path d="m2 2 20 20"/></svg></button>
-          <button class="primary" id="cycle-through"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw-icon lucide-refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></button>
-          <button class="primary" id="stop-cycle-through" disabled><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw-off-icon lucide-refresh-cw-off"><path d="M21 8L18.74 5.74A9.75 9.75 0 0 0 12 3C11 3 10.03 3.16 9.13 3.47"/><path d="M8 16H3v5"/><path d="M3 12C3 9.51 4 7.26 5.64 5.64"/><path d="m3 16 2.26 2.26A9.75 9.75 0 0 0 12 21c2.49 0 4.74-1 6.36-2.64"/><path d="M21 12c0 1-.16 1.97-.47 2.87"/><path d="M21 3v5h-5"/><path d="M22 22 2 2"/></svg></button>
-          <span style="flex-grow: 1;"></span>
-          <!-- <button id="record" class="primary">Record video</button> -->
-          <button class="primary" id="pause" disabled><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-pause-icon lucide-circle-pause"><circle cx="12" cy="12" r="10"/><line x1="10" x2="10" y1="15" y2="9"/><line x1="14" x2="14" y1="15" y2="9"/></svg></button>
-          <button class="primary" id="play"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play-icon lucide-circle-play"><path d="M9 9.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997A1 1 0 0 1 9 14.996z"/><circle cx="12" cy="12" r="10"/></svg></button>
-        </div>
-        <div class="control-div">
-          <label for="method" class="label-left">Solver</label>
-          <select id="method">
-            <optgroup label="Recommended">
-            <option value="dop853">DOP853</option>
-            <option value="feagin14">Feagin14</option>
-            </optgroup>
-            <optgroup label="Other Integrators">
-            <option value="rk4">RK4</option>
-            <option value="verlet">Velocity Verlet</option>
-            </optgroup>
-          </select>
-          <button id="method-btn" class="info-btn" data-for="method" aria-label="Explain the selected integrator" aria-controls="info-pop">?</button>
-        </div>
+      <div class="control-row">
+        <!-- Settings -->
+        <button class="primary" id="settings" title="Settings"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings2-icon lucide-settings-2"><path d="M14 17H5"/><path d="M19 7h-9"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg></button>
+          <div class="spacer"></div>
+        <!-- GitHub link -->
+        <button class="primary" id="github"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github-icon lucide-github"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></button>
+        <!-- Help -->
+        <button class="primary" id="help"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-question-mark-icon lucide-circle-question-mark"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
       </div>
-      <div class="control row-small">
-        <div class="control-div">
-          <label for="example-class">Example class</label>
-          <button id="example-class-btn" class="info-btn" data-for="example-class" aria-haspopup="dialog" aria-controls="info-dialog" title="What is this?">?</button>
-       </div>
+      <div class="last-row">
+        <div class="control-row">
         <select id="example-class">
           <optgroup label="2D Examples">
             <option value="free_fall">Free Fall (Ling-Liao)</option>
@@ -56,35 +35,57 @@
             <option value="bhh_satellites">BHH Satellites</option>
             <option value="broucke_boggs">Broucke Boggs</option>
             <option value="matt_sheen">Matt Sheen</option>
+          </optgroup>
+          <optgroup label="3D Examples">
             <option value="3d_examples">Examples 3D</option>
-            </optgroup>
+          </optgroup>
           <optgroup label="Personal">
             <option value="custom">Custom Examples</option>
-            <option value="bookmarks">Bookmarks</option>
+            <option value="bookmarks">Favorites</option>
           </optgroup>
         </select>
-        <div class="control-div">
-          <label for="example">Select example</label>
-          <button id="example-btn" class="info-btn" data-for="example" aria-haspopup="dialog" aria-controls="info-dialog" title="What is this?">?</button>
-        </div>
-        <div class="control-div">
         <select id="example"></select>
-        <button id="new-example" class="primary">Edit</button>
+        <!-- cycle through stack buttons -->
+        <div class="stack">
+          <button class="primary" id="cycle-through"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-play-icon lucide-image-play"><path d="M15 15.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997a1 1 0 0 1-1.517-.86z"/><path d="M21 12.17V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/><path d="m6 21 5-5"/><circle cx="9" cy="9" r="2"/></svg></button>
+          <button class="primary" id="stop-cycle-through" disabled><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square-icon lucide-square"><rect width="18" height="18" x="3" y="3" rx="2"/></svg></button>
+          </div>
+        </div>
+        <div class="control-row control-time-row">
+        <input id="control-time" type="range" min="0" max="1000" step="1" value="1000" />
+        </div>
+        <div class="control-row">
+          <button id="new-example" class="primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil-line-icon lucide-pencil-line"><path d="M13 21h8"/><path d="m15 5 4 4"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg></button>
+          <div class="spacer"></div>
+          <!-- Favorites stack buttons -->
+          <div class="stack">
+            <button class="primary" id="bookmark"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart-icon lucide-heart"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/></svg></button>
+            <button class="primary" id="remove-bookmark"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart-off-icon lucide-heart-off"><path d="M10.5 4.893a5.5 5.5 0 0 1 1.091.931.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 1.872-1.002 3.356-2.187 4.655"/><path d="m16.967 16.967-3.459 3.346a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5a5.5 5.5 0 0 1 2.747-4.761"/><path d="m2 2 20 20"/></svg></button>
+           </div>
+
+          <div class="divider"></div>
+          <button class="primary" id="previous-example"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left-icon lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg></button>
+          <!-- Play/Pause stacked button -->
+          <div class="stack">
+            <button class="primary" id="play" disabled><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play-icon lucide-play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+            <button class="primary" id="pause"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pause-icon lucide-pause"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></svg><circle cx="12" cy="12" r="10"/></svg></button>
+          </div>
+          <button class="primary" id="next-example"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right-icon lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg></button>
         </div>
       </div>
+          <!-- <button id="record" class="primary">Record video</button> -->
+
     </div>
   </header>
   <div id="canvasWrap" tabindex="0">
     <canvas id="plot"></canvas>
-    <div id="legend" data-display="true"><span id="legend-toggle">?</span><div id="legend-content"></div></div>
+    <div id="legend" data-display="false"><span id="legend-toggle">+</span><div id="legend-content"></div></div>
   </div>
   <div id="footer">
   <div class="status" id="status"></div>
   <div class="spacer"></div>
   <div class="coords" id="coords"></div>
   </div>
-</div>
-
 <dialog id="new-example-dialog" aria-labelledby="new-example-title">
   <form method="dialog" id="new-example-form" class="modal">
     <h2 id="new-example-title">New 3-Body Initial Conditions (IC)</h2>
@@ -147,6 +148,60 @@
     </menu>
   </form>
 </dialog>
+
+<dialog id="settings-dialog" aria-labelledby="settings-title">
+  <form method="dialog" class="modal" id="settings-form">
+    <h2 id="settings-title">Settings</h2>
+    <div>
+      <label for="method" class="label-left">Solver</label>
+      <select id="method">
+        <optgroup label="Recommended">
+        <option value="dop853">DOP853</option>
+        <option value="feagin14">Feagin14</option>
+        </optgroup>
+        <optgroup label="Other Integrators">
+        <option value="rk4">RK4</option>
+        <option value="verlet">Velocity Verlet</option>
+        </optgroup>
+      </select>
+    </div>
+    <div>
+      <label for="full-paths" class="label-left">Draw full Paths</label>
+      <input type="checkbox" id="full-paths" />
+    </div>
+    <menu class="modal-actions">
+      <button value="cancel" class="primary">Close</button>
+    </menu>
+  </form>
+</dialog>
+
+<dialog id="help-dialog" aria-labelledby="help-title">
+  <form method="dialog" class="modal" id="help-form">
+    <section class="help-body" id="help-body" role="tabpanel" tabindex="0" aria-live="polite"></section>
+    <div class="modal-actions">
+      <button type="button" class="help-back" data-goto="help-index">← Back to index</button>
+      <div class="spacer"></div>
+      <button value="cancel" class="primary">Close</button>
+    </div>
+  </form>
+</dialog>
+
+
+<template id="help-controls">
+  <h2>Controls</h2>
+  <p>Quick guide to the UI:</p>
+  <ul>
+    <li><strong>Examples</strong>: pick a class, then a specific orbit.</li>
+    <li><strong>Play/Pause</strong>: animate the solution; use ←/→ to step.</li>
+    <li><strong>Slider</strong>: scrub from 0 → period <em>t</em>.</li>
+    <li><strong>Cycle-through</strong>: auto-advance examples.</li>
+    <li><strong>Favorite</strong>: bookmark the current IC for quick access.</li>
+    <li><strong>Legend</strong>: toggle to see masses, colors, etc.</li>
+    <li><strong>Settings</strong>: choose integrator (DOP853, Feagin14, RK4, Verlet).</li>
+  </ul>
+</template>
+
+
 
 <dialog id="info-dialog" aria-labelledby="info-title">
   <form method="dialog" class="modal" id="info-form">
@@ -244,5 +299,6 @@
 <script type="module" src="script.js"></script>
 <script type="module" src="modal.js"></script>
 <script type="module" src="info.js"></script>
+<script type="module" src="help.js"></script>
 </body>
 </html>
