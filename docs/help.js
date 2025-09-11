@@ -21,6 +21,8 @@ const topicsBase = [
     { id: 'help-examples-index', title: 'Examples' },
     // Controls page 
     { id: 'help-controls', title: 'Controls' },
+    // About page
+    { id: 'help-about', title: 'About' },
 ];
 
 
@@ -39,19 +41,24 @@ function renderIndex() {
       <p>Pick a section to learn more.</p>
       <div class="help-cards">
         <article class="help-card">
+          <h3>About</h3>
+          <p>About the three-body problem simulator.</p>
+          <button data-goto="help-about">Read more…</button>
+        </article>
+        <article class="help-card">
           <h3>Methods (ODE Solvers)</h3>
           <p>DOP853, Feagin 14(12), RK4, Velocity Verlet—what to use and when.</p>
-          <button data-goto="help-method">Open</button>
+          <button data-goto="help-method">Read more…</button>
         </article>
         <article class="help-card">
           <h3>Examples</h3>
           <p>Browse all example families with descriptions.</p>
-          <button data-goto="help-examples-index">Open</button>
+          <button data-goto="help-examples-index">Read more…</button>
         </article>
         <article class="help-card">
           <h3>Controls</h3>
           <p>How to drive the app: play/pause, slider, favorites, settings…</p>
-          <button data-goto="help-controls">Open</button>
+          <button data-goto="help-controls">Read more…</button>
         </article>
       </div>
     `;
@@ -70,8 +77,8 @@ function renderExamplesIndex() {
         card.className = 'help-card';
         card.innerHTML = `
         <h3>${title}</h3>
-        <p>${text(t.content.querySelector('p')) || 'Read more…'}</p>
-        <button data-goto="${t.id}">Open</button>
+        <p>${text(t.content.querySelector('p'))}</p>
+        <button data-goto="${t.id}">Read more…</button>
       `;
         wrap.appendChild(card);
     });
@@ -92,7 +99,7 @@ function renderTemplate(id) {
     }
 }
 
-function selectTopic(id, { persist = false, focusTab = false } = {}) {
+function selectTopic(id, { persist = false } = {}) {
     dialog.querySelector('.help-back').style.display = 'block';
     if (id === 'help-index') {
         renderIndex();

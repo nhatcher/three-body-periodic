@@ -218,19 +218,27 @@
 
 <!-- METHOD helps -->
 <template id="help-method">
-  <h1>ODE numerical solvers</h1>
+  <h2>ODE numerical solvers</h2>
   <p>Choose here the numerical integration method used to solve the there body problem (Recommended DOP853)</p>
   <p>The differential equation is solved in a web-worker</p>
-  <h2 id="info-title">DOP853 (8(5,3))</h2>
+  <h3 id="info-title">DOP853 (8(5,3))</h3>
   <p>Dormand-Prince method of order 8. This is the recommended method for most problems.</p>
-  <h2 id="info-title">Feagin 14(12)</h2>
+  <h3 id="info-title">Feagin 14(12)</h3>
   <p>Very high-order explicit RK with embedded error. Heavy but superb when you need extreme accuracy/precision.</p>
   <p>Uses multiple precision arithmetic. Solving an example might take minutes or hours.</p>
-  <h2 id="info-title">RK4</h2>
+  <h3 id="info-title">RK4</h3>
   <p>Classic fixed-step 4th order. Simple to code and understand. It generally doesn't perform well in these examples</p>
-  <h2 id="info-title">Velocity Verlet</h2>
+  <h3 id="info-title">Velocity Verlet</h3>
   <p>Symplectic 2nd order—great long-term energy behavior for Hamiltonian systems with a suitably small dt.</p>
   <p>It is here just as an example</p>
+</template>
+
+<template id="help-about">
+  <h2 id="info-title">About</h2>
+  <p>The three-body problem simulator helps users visualize and understand the complex gravitational interactions between three celestial bodies.</p>
+  <p>It features a collection of known periodic orbits, allowing users to explore and learn about these fascinating solutions to the three-body problem.</p>
+  <p>Users can select different example classes, control the simulation, and even create and save their own initial conditions.</p>
+  <p>The simulator is built using Rust, Wasm, JavaScript and HTML5, leveraging the power of modern web technologies to provide an interactive and educational experience.</p>
 </template>
 
 <!-- EXAMPLE-CLASS helps -->
